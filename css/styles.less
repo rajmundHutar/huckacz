@@ -1,0 +1,318 @@
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: 100%;
+    font: inherit;
+    vertical-align: baseline;
+    outline: none;
+}
+html {height:100%;}
+body { font-size: 100%; line-height: 1; font-family: Verdana, Arial, Tahoma, sans-serif; color:black; height:100%;}
+
+article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section { display: block; }
+ol, ul { list-style: none; }
+
+blockquote, q { quotes: none; }
+blockquote:before, blockquote:after, q:before, q:after { content: ''; content: none; }
+strong { font-weight: bold; } 
+
+input { outline: none; }
+
+table { border-collapse: collapse; border-spacing: 0; }
+img { border: 0; max-width: 100%; }
+
+a { color:gray; text-decoration: none; }
+a:hover { color:black; text-decoration: underline; }
+
+
+body {
+    background-color: #7BAD29;
+}
+
+h1{
+    font-weight:  bold;
+    text-align: center;
+    font-size: 200%;
+}
+h2
+{
+    font-weight:bold;
+    text-align:center;
+    margin: 20px 0px 20px 0px;
+}
+h3{
+    text-decoration:underline;
+    font-weight:bold;
+    text-indent:5%;
+}
+h4{
+    text-decoration:underline;
+    font-weight:bold;
+    font-style:italic;
+    margin: 0px 0px 0px 10%;
+}
+h5{
+    color:black;
+    text-decoration:none;
+    font-size: 120%;
+    font-weight:bold;
+    font-style:italic;
+    margin: 10px 0px 10px -10px;
+}
+h6 {
+    font-size: 80%;
+    text-decoration:none;
+    font-weight:normal;
+    margin: 0px 0px 0px 10%;}
+h4.blue{
+    color:blue;
+    text-decoration:none;
+    font-weight:bold;
+    font-style:italic;
+    margin: 0px 0px 0px 0px;
+}
+h4.green{
+    color:lime;
+    text-decoration:none;
+    font-weight:bold;
+    font-style:italic;
+    margin: 0px 0px 0px 0px;
+}
+h4.red{
+    color:red;
+    text-decoration:none;
+    font-weight:bold;
+    font-style:italic;
+    margin: 0px 0px 0px 0px;
+}
+
+header{
+    width:100%;
+    height:150px;
+    background: url('../obr/postavy/nadpis_hucka2.png') no-repeat top center;
+}
+header img{
+    height: 100%;
+}
+
+navigation {
+    display: block;
+    float: left;
+    width: 300px;
+}
+a.menuodkaz{
+    font-size: 150%;
+    color: black;
+    text-decoration: none;
+}
+a.menuodkaz:hover{
+    text-decoration: none;
+    text-shadow: 0px 0px 20px #ffffff;
+}
+a.menuodkaz:hover img{
+    visibility: visible;
+}
+ul.menu li {
+    padding: 5px;
+}
+ul.menu li img{
+    height: 30px;
+    width: 52px;
+    visibility: hidden;
+}
+ul.menu li div{
+    display: inline-table;
+    width: 220px;
+    padding-left: 10px;
+}
+ul.menu li.space{
+    background: url('../obr/postavy/matrix.png') no-repeat top center;
+    height: 35px;
+}
+
+
+div#wrapper {
+    min-height: 100%;
+    position: relative;
+    background: -webkit-linear-gradient(left,rgba(0,0,0,0),white,white,white,white,white,white,white);
+}
+
+article{
+    padding: 40px 10px 40px 20px;
+    margin-left: 300px;
+    overflow: auto;
+}
+
+footer {
+    clear: both;
+    width: 100%;
+    height: 40px;
+    position: absolute;
+    bottom: 0;
+    left: 0;  
+    clear:both;
+    div{
+        text-align: center;
+        padding-top: 10px;
+    }
+}
+
+
+table.book td{
+    padding: 5px;
+}
+table.book td.book_num{
+    width:5%;
+    vertical-align: middle;
+    text-align: center;
+}
+
+table.book td.book_name{
+    font-weight: bold;
+}
+
+table.book td.book_ip{
+    font-size: 80%;
+    text-align: right;
+}
+.security_hidden{
+    display: none;
+}
+
+
+table.guestbook_form{
+    width:80%;
+    max-width: 950px;
+    margin: 10px auto;
+}
+table.guestbook_form td{
+    padding:5px;
+}
+table.guestbook_form .smailici{
+    width:50%;
+}
+table.guestbook_form img.add_smailik{
+    cursor:pointer;
+}
+
+table.guestbook_form #form_text{
+    width:100%;
+    height: 100px;
+}
+table.guestbook_form input[type=text]{
+    width:100%;
+}
+table.guestbook_form input[type=submit]{
+    display: block;
+    margin: 5px auto;
+}
+div.guestbook_navigation{
+    width: 30%;
+    margin: 0 auto;
+}
+
+
+ul.galery_list{
+    li{
+        height: 160px;
+        width: 160px;
+        padding:10px;
+        float:left;
+        div.galery_wrap {
+            width:100%;
+            height:100%;
+            border:1px solid black;
+            div.galery_text {
+                padding-top: 20px;
+            }
+            div.galery_photo {
+                img {
+                    display: block;
+                    margin: 10px auto; 
+                    max-height: 100px;
+                    max-width: 135px;
+                }
+            }
+        }
+    }
+} 
+
+ul.contact{
+    li{
+        height: 200px;
+        div.contact_image{
+            float: left;
+            width: 19%;
+            height: 100%;
+            img{
+                max-height: 80%;
+                padding: 10% 0 0 15%;
+            }
+        }
+        div.contact_details{
+            float: left;
+            height: 100%;
+            width: 80%;
+            div.contact_wrap{
+                margin-top:35px;
+                line-height: 150%;
+            }
+        }    
+    }
+
+}
+
+.clear{
+    clear:both;
+    float:none;
+}
+.odkaz{
+    cursor:pointer;
+    color:gray;
+    text-decoration:none;
+}
+.odkaz:hover{
+    color:black;
+    text-decoration:underline;
+}
+.poznamka{
+    font-size: 80%;
+    color: rgb(54,54,54);
+    padding: 0px 0px 0px 30pt;
+    text-decoration: none;
+}
+.red{
+    color:rgb(218,37,28);
+}
+.blue{
+    color:rgb(138,60,127);
+}
+.green{
+    color:rgb(123,173,40);
+}
+.txt_center{
+    text-align: center;
+}
+
+/*REPORT*/
+div.report{
+    font-weight:bold;
+    padding:10px 20px 10px 20px;
+    margin: 5px 10px 5px 10px;
+}
+div.ok{
+    border:2px solid #68AD68;
+    background-color:rgb(224,255,224);
+    color: green;
+}
+div.error{
+    border: 2px solid #AD6868;
+    background-color: #FFE7E7;
+    color: rgb(224, 0, 0);
+}
+div.notice{
+    border: 2px solid #E27600;
+    background-color: #FFF3B6;
+    color: #E27600;
+}
