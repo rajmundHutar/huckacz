@@ -1,0 +1,37 @@
+{block scripts}
+{include parent}
+<script src="{$basePath}/js/fifteen.js"></script>
+{/block}
+
+{block head}
+{include parent}
+<link href="{$basePath}/css/fifteen.css" rel="stylesheet">
+{/block}
+
+{block content}
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">Patnáctka</h1>
+        <ol class="breadcrumb">
+            <li><a n:href="Homepage:">Home</a></li>
+            <li><a n:href="Games:">Hry</a></li>
+            <li class="active">Patnáctka</li>
+        </ol>
+    </div>
+</div>
+
+<div class='well'>
+    <ul class="list-inline">
+        <li>
+            <button id="shuffle" class="btn btn-primary">Zamíchat</button>
+        </li>
+        <li>
+            <span class='glyphicon glyphicon-time'></span> <span id='time'>00:00.000</span>
+        </li>
+    </ul>
+</div>
+
+<section id="game" class="row">
+
+    <img src='{$baseUri}/images/games/fifteen/00.jpg' data-position='0-0' class="card">
+</section>

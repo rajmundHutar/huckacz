@@ -21,4 +21,7 @@ session:
 
 services:
 #	- App\Model\UserManager
+	- App\Model\GuestbookModel
+	- App\Model\GalleryModel
+	- App\Model\GallerySnapshotModel
 	router: App\RouterFactory::createRouter

@@ -1,2 +1,151 @@
-{block content}
+{block header}
+<!-- Header Carousel -->
+<header id="myCarousel" class="carousel slide">
+    <!-- Indicators -->
+    <ol class="carousel-indicators">
+        <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
+        <li data-target="#myCarousel" data-slide-to="1"></li>
+        <li data-target="#myCarousel" data-slide-to="2"></li>
+    </ol>
 
+    <!-- Wrapper for slides -->
+    <div class="carousel-inner">
+        <div class="item active">
+            <div class="fill" style="background-image:url('{$baseUri}/images/titleCarousel/carousel1.jpg');"></div>
+            <div class="carousel-caption">
+                <h2>Hučka aneb festival&hellip;</h2>
+            </div>
+        </div>
+        <div class="item">
+            <div class="fill" style="background-image:url('{$baseUri}/images/titleCarousel/carousel2.jpg');"></div>
+            <div class="carousel-caption">
+                <h2>&hellip;na prknech, jež znamenají svět&hellip;</h2>
+            </div>
+        </div>
+        <div class="item">
+            <div class="fill" style="background-image:url('{$baseUri}/images/titleCarousel/carousel3.jpg');"></div>
+            <div class="carousel-caption">
+                <h2>&hellip;kde diváci jsou herci a herci diváky.</h2>
+            </div>
+        </div>
+    </div>
+
+    <!-- Controls -->
+    <a class="left carousel-control" href="#myCarousel" data-slide="prev">
+        <span class="icon-prev"></span>
+    </a>
+    <a class="right carousel-control" href="#myCarousel" data-slide="next">
+        <span class="icon-next"></span>
+    </a>
+</header>
+{/block}
+
+{block content}
+<!-- Marketing Icons Section -->
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">
+            Hučka 2015
+        </h1>
+    </div>
+    <div class="col-md-4">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4><i class="fa fa-fw fa-check"></i> Kdy</h4>
+            </div>
+            <div class="panel-body">
+                <p>v sobotu 28. listopadu 2015</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4><i class="fa fa-fw fa-gift"></i> Kde</h4>
+            </div>
+            <div class="panel-body">
+                <p>v Klubu Hájek, Třebíč</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4><i class="fa fa-fw fa-compass"></i> Pro koho</h4>
+            </div>
+            <div class="panel-body">
+                <p>Pro malé i velké</p>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /.row -->
+
+<!-- Portfolio Section -->
+<div class="row">
+    <div class="col-lg-8">
+        <div class="col-lg-12">
+            <h2 class="page-header">Momentky z minulých ročníků</h2>
+        </div>
+        <div class="col-md-6 col-sm-6">
+            <a href="portfolio-item.html">
+                <img class="img-responsive img-portfolio img-hover" src="http://placehold.it/700x450" alt="">
+            </a>
+        </div>
+        <div class="col-md-6 col-sm-6">
+            <a href="portfolio-item.html">
+                <img class="img-responsive img-portfolio img-hover" src="http://placehold.it/700x450" alt="">
+            </a>
+        </div>
+        <div class="col-md-6 col-sm-6">
+            <a href="portfolio-item.html">
+                <img class="img-responsive img-portfolio img-hover" src="http://placehold.it/700x450" alt="">
+            </a>
+        </div>
+        <div class="col-md-6 col-sm-6">
+            <a href="portfolio-item.html">
+                <img class="img-responsive img-portfolio img-hover" src="http://placehold.it/700x450" alt="">
+            </a>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="col-lg-12">
+            <a n:href="Guestbook:"><h2 class="page-header">Kniha návštěv</h2></a>
+        </div>
+        {for $i = 0; $i < 5; $i++}
+            {var $post = array_shift($guestBook)}
+            <div class="media col-lg-12">
+                <div class="media-body">
+                    <h4 class="media-heading">{$post->getName()}
+                        <small>{$post->getDate()|date:"d. M Y H:i"}</small>
+                    </h4>
+                        {$post->getText()|smiles}&hellip;
+                </div>
+            </div>
+            <hr n:if="$i != 4">
+        {/for}
+    </div>
+</div>
+
+<hr>
+
+<div class="well">
+    <div class="row">
+        <div class="col-md-8">
+            <h3>Přihlašování bude spuštěno 1. září 2015:</h3>
+        </div>
+        <div class="col-md-4">
+            <a class="btn btn-lg btn-default btn-block" n:href="Login:default">Přihlásit vlastní divadlo</a>
+        </div>
+    </div>
+</div>
+
+<div class="well">
+    <div class="row">
+        <div class="col-md-8">
+            <p>FB Plugin TODO:)</p>
+        </div>
+    </div>
+</div>
+
+{/block}   

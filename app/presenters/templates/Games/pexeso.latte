@@ -1,0 +1,32 @@
+{block scripts}
+{include parent}
+<script src="{$basePath}/js/matchgame.js"></script>
+{/block}
+
+{block head}
+{include parent}
+<link href="{$basePath}/css/matchgame.css" rel="stylesheet">
+{/block}
+
+{block content}
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">Pexeso</h1>
+        <ol class="breadcrumb">
+            <li><a n:href="Homepage:">Home</a></li>
+            <li><a n:href="Games:">Hry</a></li>
+            <li class="active">Pexeso</li>
+        </ol>
+    </div>
+</div>
+
+<section id="game" class="row">
+    <div class='well'><span class='glyphicon glyphicon-time'></span> <span id='time'>00:00.000</span></div>
+    <div class="cards" class="col-lg-4">
+        <div class="card">
+            <div class="face front"></div>
+            <div class="face back"><img src=''></div>
+        </div> 
+    </div> 
+</section>
+

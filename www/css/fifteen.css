@@ -1,0 +1,18 @@
+.napoveda { 
+    background-image: url('./napoveda.jpg');
+    background-repeat: no-repeat;
+    width:200px;
+}
+
+.menu{
+    padding-top:20px;
+}
+
+#game{
+    position: relative;
+    height: 500px;
+}
+
+.card{
+    position: absolute;
+}
