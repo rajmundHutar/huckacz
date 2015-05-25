@@ -35,13 +35,17 @@ class GalleryModel {
         $gallery = $this->galleries[$year];
         $gallery["year"] = $year;
         $gallery["images"] = [];
-        foreach (Finder::findFiles('*')->from("images/gallery/{$year}/thumbnails/") as $file) {
+        foreach (Finder::findFiles('*.jpg')->from("images/gallery/{$year}/thumbnails/") as $file) {
             $gallery["images"][] = [
                 "thumbnail" => self::GALLERY_PATH . "/{$year}/thumbnails/" . basename($file),
                 "image" => self::GALLERY_PATH . "/{$year}/images/" . basename($file),
             ];
         }
         return $gallery;
+    }
+    
+    public function getGalleries(){
+        return $this->galleries;
     }
 
 }

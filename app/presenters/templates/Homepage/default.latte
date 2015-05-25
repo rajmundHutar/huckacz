@@ -87,26 +87,21 @@
         <div class="col-lg-12">
             <h2 class="page-header">Momentky z minulých ročníků</h2>
         </div>
-        <div class="col-md-6 col-sm-6">
-            <a href="portfolio-item.html">
-                <img class="img-responsive img-portfolio img-hover" src="http://placehold.it/700x450" alt="">
-            </a>
-        </div>
-        <div class="col-md-6 col-sm-6">
-            <a href="portfolio-item.html">
-                <img class="img-responsive img-portfolio img-hover" src="http://placehold.it/700x450" alt="">
-            </a>
-        </div>
-        <div class="col-md-6 col-sm-6">
-            <a href="portfolio-item.html">
-                <img class="img-responsive img-portfolio img-hover" src="http://placehold.it/700x450" alt="">
-            </a>
-        </div>
-        <div class="col-md-6 col-sm-6">
-            <a href="portfolio-item.html">
-                <img class="img-responsive img-portfolio img-hover" src="http://placehold.it/700x450" alt="">
-            </a>
-        </div>
+        {foreach $snapshots as $snapshot}
+            {if $iterator->counter % 2 == 1}
+                <div class="row">
+                {/if}
+                <div class="col-md-6 col-sm-6 portfolio">
+                    <a href="{$baseUri}{$snapshot->getImage()}" data-lightbox="lightbox">
+                        <img class="img-responsive img-portfolio img-hover img-thumbnail" src="{$baseUri}{$snapshot->getThumbnail()}" alt="{$snapshot->getTitle()}">
+                    </a>
+                </div>
+
+                {if $iterator->counter % 2 == 0 || $iterator->isLast()}    
+                </div>
+            {/if}                
+        {/foreach}     
+
     </div>
     <div class="col-lg-4">
         <div class="col-lg-12">
@@ -116,10 +111,15 @@
             {var $post = array_shift($guestBook)}
             <div class="media col-lg-12">
                 <div class="media-body">
-                    <h4 class="media-heading">{$post->getName()}
+                    <div class="col-xs-6">
+                        <h4 class="media-heading">{$post->getName()}</h4>
+                    </div>
+                    <div class="col-xs-6 text-right">
                         <small>{$post->getDate()|date:"d. M Y H:i"}</small>
-                    </h4>
+                    </div>
+                    <div class="col-xs-12">
                         {$post->getText()|smiles}&hellip;
+                    </div>
                 </div>
             </div>
             <hr n:if="$i != 4">
