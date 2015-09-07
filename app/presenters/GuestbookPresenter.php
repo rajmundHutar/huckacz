@@ -4,7 +4,8 @@ namespace App\Presenters;
 
 use App\Model\GuestbookModel,
     App\Model\Entities\GuestbookComment,
-    DateTime;
+    DateTime,
+    App\Model\GalleryModel;
 
 /**
  * Description of GuestbookPresenter
@@ -16,8 +17,8 @@ class GuestbookPresenter extends BasePresenter {
     protected $guestbookModel;
 
 
-    public function __construct(GuestbookModel $guestbookModel) {
-        parent::__construct();
+    public function __construct(GalleryModel $galleryModel, GuestbookModel $guestbookModel) {
+        parent::__construct($galleryModel);
         $this->guestbookModel = $guestbookModel;
     }
     

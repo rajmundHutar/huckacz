@@ -13,14 +13,14 @@
 </div>
 
 
-
+<div class="galleryImages">
 {foreach $gallery['images'] as $image}
     {if $iterator->counter % 4 == 1}
         <div class="row">
         {/if}
-        <div class="col-md-3 img-portfolio">
+        <div class="col-md-3 portfolio">
             <a href="{$baseUri}{$image['image']}" data-lightbox="lightbox">
-                <img class="img-responsive img-hover" src="{$baseUri}{$image['thumbnail']}" alt="">
+                <img class="img-responsive img-portfolio img-hover img-thumbnail" src="{$baseUri}{$image['thumbnail']}" alt="">
             </a>
         </div>
 
@@ -28,7 +28,7 @@
         </div>
     {/if}                
 {/foreach}
-
+</div>
 
 <!-- 
 <div class="row text-center">

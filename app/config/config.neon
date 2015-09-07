@@ -27,8 +27,8 @@ services:
 	router: App\RouterFactory::createRouter
 
 database:
-	dsn: 'mysql:host=mysql;dbname=hucka_rajmund_cz'
-	user: hucka.rajmund.cz
-	password: 6uLVfVMoTL
+	dsn: 'mysql:host=wm93.wedos.net;dbname=d107245_hucka'
+	user: w107245_hucka
+	password: tLVPQfce
 	options:
 		lazy: yes
