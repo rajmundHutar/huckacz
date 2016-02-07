@@ -54,7 +54,10 @@ class GalleryModel {
         "2014" => [
             "title" => "Hučka jako banán",
         ],
-    ];
+        "2015" => [
+            "title" => "Hučka 2015 - Půlmaraton",
+        ],
+        ];
 
     const GALLERY_PATH = "/images/gallery";
 

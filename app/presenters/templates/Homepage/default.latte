@@ -41,48 +41,59 @@
 {/block}
 
 {block content}
-<!-- Marketing Icons Section -->
+<!--
 <div class="row">
-    <div class="col-lg-12">
-        <h1 class="page-header">
-            Hučka 2015
-        </h1>
+    <div class="col-lg-12 text-justify">
+        <h3>Drazí Hučkaři</h3>
+        
+        <h2>Hučka 2016 bude!</h2>
+        
+        <div class="text-right">Organizační tým Hučky</div>        
     </div>
-    <div class="col-md-4">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h4><i class="fa fa-fw fa-check"></i> Kdy</h4>
-            </div>
-            <div class="panel-body">
-                <p>v sobotu 28. listopadu 2015</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h4><i class="fa fa-fw fa-gift"></i> Kde</h4>
-            </div>
-            <div class="panel-body">
-                <p>v Klubu Hájek, Třebíč</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h4><i class="fa fa-fw fa-compass"></i> Pro koho</h4>
-            </div>
-            <div class="panel-body">
-                <p>Pro malé i velké</p>
-            </div>
-        </div>
-    </div>
-</div>
-<!-- /.row -->
+</div>    
+-->
 
 <!-- Portfolio Section -->
 <div class="row">
+    <div class="col-lg-4">
+        <div class="row">
+            <div class="col-lg-12">
+                <h1 class="page-header">
+                    Hučka 2016
+                </h1>
+            </div>
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4><i class="fa fa-fw fa-check"></i> Kdy</h4>
+                    </div>
+                    <div class="panel-body">
+                        <p>v sobotu 26. listopadu 2016</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4><i class="fa fa-fw fa-gift"></i> Kde</h4>
+                    </div>
+                    <div class="panel-body">
+                        <p>v Klubu Hájek, Třebíč</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4><i class="fa fa-fw fa-compass"></i> Pro koho</h4>
+                    </div>
+                    <div class="panel-body">
+                        <p>Pro malé i velké (více informací v září)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="col-lg-8">
         <div class="col-lg-12">
             <h2 class="page-header">Momentky z minulých ročníků</h2>
@@ -103,42 +114,22 @@
         {/foreach}     
 
     </div>
-    <div class="col-lg-4">
-        <div class="col-lg-12">
-            <a n:href="Guestbook:"><h2 class="page-header">Kniha návštěv</h2></a>
-        </div>
-        {for $i = 0; $i < 5; $i++}
-            {var $post = array_shift($guestBook)}
-            <div class="media col-lg-12">
-                <div class="media-body">
-                    <div class="col-xs-6">
-                        <h4 class="media-heading">{$post->getName()}</h4>
-                    </div>
-                    <div class="col-xs-6 text-right">
-                        <small>{$post->getDate()|date:"d. M Y H:i"}</small>
-                    </div>
-                    <div class="col-xs-12">
-                        {$post->getText()|smiles}&hellip;
-                    </div>
-                </div>
-            </div>
-            <hr n:if="$i != 4">
-        {/for}
-    </div>
 </div>
 
 <hr>
 
+<!--
 <div class="well">
     <div class="row">
         <div class="col-md-8">
-            <h3>Přihlašování bude spuštěno 23. září 2015:</h3>
+            <h3>Přihlašování již spouštěno:</h3>
         </div>
         <div class="col-md-4">
             <a class="btn btn-lg btn-default btn-block" n:href="Login:default">Přihlásit vlastní divadlo</a>
         </div>
     </div>
 </div>
+-->
 
 <div class="well">
     <div class="row">
@@ -151,9 +142,9 @@
             </div>        
         </div>        
         <div class="col-md-6">
-            <div class="fb-page" data-href="https://www.facebook.com/hucka.festival" data-tabs="timeline" data-width="500" data-small-header="false" data-adapt-container-width="true" data-hide-cover="false" data-show-facepile="true"><div class="fb-xfbml-parse-ignore"><blockquote cite="https://www.facebook.com/hucka.festival"><a href="https://www.facebook.com/hucka.festival">Hučka</a></blockquote></div></div>
+            <div class="fb-page" data-href="https://www.facebook.com/hucka.festival" data-width="320" data-small-header="true" data-adapt-container-width="true" data-hide-cover="false" data-show-facepile="true" data-show-posts="true"><div class="fb-xfbml-parse-ignore"><blockquote cite="https://www.facebook.com/hucka.festival"><a href="https://www.facebook.com/hucka.festival">Hučka</a></blockquote></div></div>
         </div>
-        
+
     </div>
 </div>
 
