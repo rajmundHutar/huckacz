@@ -24,6 +24,7 @@ services:
 	- App\Model\GuestbookModel
 	- App\Model\GalleryModel
 	- App\Model\GallerySnapshotModel
+	- App\Model\SignInTheater
 	router: App\RouterFactory::createRouter
 
 database:
