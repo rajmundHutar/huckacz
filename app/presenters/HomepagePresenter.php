@@ -14,8 +14,8 @@ class HomepagePresenter extends BasePresenter {
     protected $guestbookModel;
     protected $gallerySnapshotModel;
 
-    public function __construct(GalleryModel $galleryModel, GuestbookModel $guestbookModel, GallerySnapshotModel $gallerySnapshotModel) {
-        parent::__construct($galleryModel);
+    public function __construct(GuestbookModel $guestbookModel, GallerySnapshotModel $gallerySnapshotModel) {
+        parent::__construct();
         $this->guestbookModel = $guestbookModel;
         $this->gallerySnapshotModel = $gallerySnapshotModel;
     }

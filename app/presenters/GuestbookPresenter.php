@@ -17,8 +17,8 @@ class GuestbookPresenter extends BasePresenter {
     protected $guestbookModel;
 
 
-    public function __construct(GalleryModel $galleryModel, GuestbookModel $guestbookModel) {
-        parent::__construct($galleryModel);
+    public function __construct(GuestbookModel $guestbookModel) {
+        parent::__construct();
         $this->guestbookModel = $guestbookModel;
     }
     

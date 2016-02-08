@@ -16,8 +16,8 @@ class LoginPresenter extends BasePresenter {
 
     protected $signInTheater;
 
-    public function __construct(GalleryModel $galleryModel, SignInTheater $signInTheater) {
-        parent::__construct($galleryModel);
+    public function __construct(SignInTheater $signInTheater) {
+        parent::__construct();
         $this->signInTheater = $signInTheater;
     }
 

@@ -12,8 +12,7 @@ abstract class BasePresenter extends Nette\Application\UI\Presenter {
 
     protected $galleryModel;
     
-    public function __construct(GalleryModel $galleryModel) {
-        parent::__construct();
+    public function injectGalleryModel(GalleryModel $galleryModel) {
         $this->galleryModel = $galleryModel;        
     }
     
