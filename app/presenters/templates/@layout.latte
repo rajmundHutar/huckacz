@@ -1,122 +1,134 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="">
-    <meta name="author" content="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="Amatérský divadelní festival pořádaný na podzim v Třebíči již od roku 1999">
+        <meta name="author" content="www.rajmund.cz">
 
-    <title>{ifset title}{include title|striptags} | {/ifset}hucka.cz</title>
+        <title>{ifset title}{include title|striptags} | {/ifset}Hučka.cz</title>
 
-    <link href="{$basePath}/css/bootstrap.min.css" rel="stylesheet">
-    <link href="{$basePath}/css/modern-business.css" rel="stylesheet">
-    <link href="{$basePath}/font-awesome/css/font-awesome.min.css" rel="stylesheet">
-    <link href="{$basePath}/css/style.css" rel="stylesheet">
-    <link href="{$basePath}/css/lightbox.css" rel="stylesheet">
-    <link href="{$basePath}/css/sweetalert.css" rel="stylesheet">
-    
-    <link href="{$basePath}/favicon.png" rel="shortcut icon" type="image/png">
-    {block head}{/block}
-</head>
-<body>
-    <script>
-    window.fbAsyncInit = function() {
-      FB.init({
-        appId      : '487212678121613',
-        xfbml      : true,
-        version    : 'v2.4'
-      });
-    };
+        <meta property="og:title"              content="{ifset title}{include title|striptags} | {/ifset}Hučka.cz" />
+        <meta property="og:url"                content="{link //this}" />
+        <meta property="og:description"        content="Amatérský divadelní festival pořádaný na podzim v Třebíči již od roku 1999" />
+        <meta property="og:image"              content="http://hucka.cz/images/pages/hucka.cz.jpg" />
+        <meta property="og:image:width"        content="1600" />
+        <meta property="og:image:height"       content="850" />
 
-    (function(d, s, id){
-       var js, fjs = d.getElementsByTagName(s)[0];
-       if (d.getElementById(id)) { return; }
-       js = d.createElement(s); js.id = id;
-       js.src = "//connect.facebook.net/en_US/sdk.js";
-       fjs.parentNode.insertBefore(js, fjs);
-     }(document, 'script', 'facebook-jssdk'));
-  </script>
-    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+        <link href="{$basePath}/css/bootstrap.min.css" rel="stylesheet">
+        <link href="{$basePath}/css/modern-business.css" rel="stylesheet">
+        <link href="{$basePath}/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+        <link href="{$basePath}/css/style.css" rel="stylesheet">
+        <link href="{$basePath}/css/lightbox.css" rel="stylesheet">
+        <link href="{$basePath}/css/sweetalert.css" rel="stylesheet">
+
+        <link href="{$basePath}/favicon.png" rel="shortcut icon" type="image/png">
+        {block head}{/block}
+    </head>
+    <body>
+        <script>
+            window.fbAsyncInit = function () {
+                FB.init({
+                    appId: '487212678121613',
+                    xfbml: true,
+                    version: 'v2.4'
+                });
+            };
+
+            (function (d, s, id) {
+                var js, fjs = d.getElementsByTagName(s)[0];
+                if (d.getElementById(id)) {
+                    return;
+                }
+                js = d.createElement(s);
+                js.id = id;
+                js.src = "//connect.facebook.net/en_US/sdk.js";
+                fjs.parentNode.insertBefore(js, fjs);
+            }(document, 'script', 'facebook-jssdk'));
+        </script>
+        <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+            <div class="container">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                        <span class="sr-only">Menu</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="{$basePath}/">Hučka.cz</a>
+                </div>
+
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    <ul class="nav navbar-nav navbar-right">
+                        <li>
+                            <a n:href="Team:">Tým hučky</a>
+                        </li>
+                        <li>
+                            <a n:href="PastYears:">Minulé ročníky</a>
+                        </li>
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Galerie <b class="caret"></b></a>
+                            <ul class="dropdown-menu">
+                                <li n:foreach="$galleries as $id => $gallery">
+                                    <a n:href="Gallery:default year => $id">Hučka {$id} {if $gallery['title'] != ''}- {$gallery['title']}{/if}</a>
+                                </li>                            
+                            </ul>
+                        </li>
+                        <li>
+                            <a n:href="Games:">Hry</a>
+                        </li>
+                        <li>
+                            <a n:href="Login:">Příhlásit divadlo</a>
+                        </li>
+                        <li>
+                            <a n:href="Contact:">Kontakt</a>
+                        </li>
+                    </ul>
+                </div>
+                <!-- /.navbar-collapse -->
+            </div>
+            <!-- /.container -->
+        </nav>
+        <div n:foreach="$flashes as $flash" n:class="flash, $flash->type">{$flash->message}</div>
+        {ifset header}
+            {include header}
+        {/ifset}
+
+
+        <!-- Page Content -->
         <div class="container">
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
-                    <span class="sr-only">Menu</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                <a class="navbar-brand" href="{$basePath}/">Hučka.cz</a>
-            </div>
+            {include content}
+            <hr>
 
-            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-                <ul class="nav navbar-nav navbar-right">
-                    <li>
-                        <a n:href="Team:">Tým hučky</a>
-                    </li>
-                    <li>
-                        <a n:href="PastYears:">Minulé ročníky</a>
-                    </li>
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Galerie <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                            <li n:foreach="$galleries as $id => $gallery">
-                                <a n:href="Gallery:default year => $id">Hučka {$id} {if $gallery['title'] != ''}- {$gallery['title']}{/if}</a>
-                            </li>                            
-                        </ul>
-                    </li>
-                    <li>
-                        <a n:href="Games:">Hry</a>
-                    </li>
-                    <li>
-                        <a n:href="Login:">Příhlásit divadlo</a>
-                    </li>
-                    <li>
-                        <a n:href="Contact:">Kontakt</a>
-                    </li>
-                </ul>
-            </div>
-            <!-- /.navbar-collapse -->
+            <!-- Footer -->
+            <footer>
+                <div class="well">
+                    <div class="row">
+                        <div class="col-xs-6">
+                            <p>Hučka aneb festival 1999 - {Date("Y")}</p>
+                        </div>
+                        <div class="col-xs-6">
+                            <p class="text-right">Webmaster: <a href="//rajmund.cz">rajmund.cz</a></p>
+                        </div>
+                    </div>
+                </div>
+            </footer>
         </div>
         <!-- /.container -->
-    </nav>
-    <div n:foreach="$flashes as $flash" n:class="flash, $flash->type">{$flash->message}</div>
-    {ifset header}
-        {include header}
-    {/ifset}
-    
-    
-    <!-- Page Content -->
-    <div class="container">
-        {include content}
-        <hr>
 
-        <!-- Footer -->
-        <footer>
-            <div class="row">
-                <div class="col-xs-6">
-                    <p>Hučka aneb festival 1999 - {Date("Y")}</p>
-                </div>
-                <div class="col-xs-6">
-                    <p class="text-right">Webmaster: <a href="//rajmund.cz">rajmund.cz</a></p>
-                </div>
-            </div>
-        </footer>
-    </div>
-    <!-- /.container -->
-    
-    {block scripts}
-    <script type="text/javascript">
-        baseUri = {$baseUri};
-        basePath = {$basePath};
-    </script>
-    <script src="//code.jquery.com/jquery-1.11.2.min.js"></script>
-    <script src="//nette.github.io/resources/js/netteForms.min.js"></script>
-    <script src="{$basePath}/js/lightbox.min.js"></script>
-    <script src="{$basePath}/js/sweetalert.min.js"></script>
-    <script src="{$basePath}/js/main.js"></script>
-    <!-- Bootstrap Core JavaScript -->
-    <script src="{$basePath}/js/bootstrap.min.js"></script>    
-    {/block}
-</body>
+        {block scripts}
+        <script type="text/javascript">
+            baseUri = {$baseUri};
+            basePath = {$basePath};
+        </script>
+        <script src="//code.jquery.com/jquery-1.11.2.min.js"></script>
+        <script src="//nette.github.io/resources/js/netteForms.min.js"></script>
+        <script src="{$basePath}/js/lightbox.min.js"></script>
+        <script src="{$basePath}/js/sweetalert.min.js"></script>
+        <script src="{$basePath}/js/main.js"></script>
+        <!-- Bootstrap Core JavaScript -->
+        <script src="{$basePath}/js/bootstrap.min.js"></script>    
+        {/block}
+    </body>
 </html>
