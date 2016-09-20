@@ -70,8 +70,8 @@
                         <li class="dropdown">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown">Galerie <b class="caret"></b></a>
                             <ul class="dropdown-menu">
-                                <li n:foreach="$galleries as $id => $gallery">
-                                    <a n:href="Gallery:default year => $id">Hučka {$id} {if $gallery['title'] != ''}- {$gallery['title']}{/if}</a>
+                                <li n:foreach="$galleries as $id => $gall">
+                                    <a n:href="Gallery:default year => $id">Hučka {$id} {if $gall['title'] != ''}- {$gall['title']}{/if}</a>
                                 </li>                            
                             </ul>
                         </li>
