@@ -1,8 +1,8 @@
 <?php
 
 /**
- * This file is part of the Nette Framework (http://nette.org)
- * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
+ * This file is part of the Nette Framework (https://nette.org)
+ * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 
 if (!function_exists('dlog')) {
@@ -11,6 +11,7 @@ if (!function_exists('dlog')) {
 	 */
 	function dlog($var = NULL)
 	{
+		trigger_error(__FUNCTION__ . '() is deprecated.', E_USER_DEPRECATED);
 		if (func_num_args() === 0) {
 			Tracy\Debugger::log(new Exception, 'dlog');
 		}
@@ -31,6 +32,7 @@ if (!function_exists('callback')) {
 	 */
 	function callback($callback, $m = NULL)
 	{
+		trigger_error(__FUNCTION__ . '() is deprecated; use native PHP callback.', E_USER_DEPRECATED);
 		return new Nette\Callback($callback, $m);
 	}
 }

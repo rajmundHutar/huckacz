@@ -1,19 +1,18 @@
 <?php
 
 /**
- * This file is part of the Nette Framework (http://nette.org)
- * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
+ * This file is part of the Latte (https://latte.nette.org)
+ * Copyright (c) 2008 David Grudl (https://davidgrudl.com)
  */
 
 namespace Latte\Runtime;
 
 use Latte;
+use Latte\Engine;
 
 
 /**
- * Template filters.
- *
- * @author     David Grudl
+ * Template filters. Uses UTF-8 only.
  * @internal
  */
 class Filters
@@ -26,28 +25,73 @@ class Filters
 
 
 	/**
-	 * Escapes string for use inside HTML template.
-	 * @param  mixed  UTF-8 encoding
-	 * @param  int    optional attribute quotes
-	 * @return string
+	 * Escapes string for use inside HTML.
+	 * @param  mixed  plain text
+	 * @return string HTML
 	 */
-	public static function escapeHtml($s, $quotes = ENT_QUOTES)
+	public static function escapeHtml($s)
 	{
-		if ($s instanceof IHtmlString || $s instanceof \Nette\Utils\IHtmlString) {
-			return $s->__toString(TRUE);
-		}
+		return htmlSpecialChars($s, ENT_QUOTES, 'UTF-8');
+	}
+
+
+	/**
+	 * Escapes string for use inside HTML.
+	 * @param  mixed  plain text or IHtmlString
+	 * @return string HTML
+	 */
+	public static function escapeHtmlText($s)
+	{
+		return $s instanceof IHtmlString || $s instanceof \Nette\Utils\IHtmlString
+			? $s->__toString(TRUE)
+			: htmlSpecialChars($s, ENT_NOQUOTES, 'UTF-8');
+	}
+
+
+	/**
+	 * Escapes string for use inside HTML attribute value.
+	 * @param  string plain text
+	 * @return string HTML
+	 */
+	public static function escapeHtmlAttr($s, $double = TRUE)
+	{
 		$s = (string) $s;
-		if ($quotes !== ENT_NOQUOTES && strpos($s, '`') !== FALSE && strpbrk($s, ' <>"\'') === FALSE) {
-			$s .= ' ';
+		if (strpos($s, '`') !== FALSE && strpbrk($s, ' <>"\'') === FALSE) {
+			$s .= ' '; // protection against innerHTML mXSS vulnerability nette/nette#1496
 		}
-		return htmlSpecialChars($s, $quotes, 'UTF-8');
+		return htmlSpecialChars($s, ENT_QUOTES, 'UTF-8', $double);
+	}
+
+
+	/**
+	 * Escapes HTML for use inside HTML attribute.
+	 * @param  mixed  HTML text
+	 * @return string HTML
+	 */
+	public static function escapeHtmlAttrConv($s)
+	{
+		return self::escapeHtmlAttr($s, FALSE);
+	}
+
+
+	/**
+	 * Escapes string for use inside HTML attribute name.
+	 * @param  string plain text
+	 * @return string HTML
+	 */
+	public static function escapeHtmlAttrUnquoted($s)
+	{
+		$s = (string) $s;
+		return preg_match('#^[a-z0-9:-]+$#i', $s)
+			? $s
+			: '"' . self::escapeHtmlAttr($s) . '"';
 	}
 
 
 	/**
 	 * Escapes string for use inside HTML comments.
-	 * @param  string  UTF-8 encoding
-	 * @return string
+	 * @param  string plain text
+	 * @return string HTML
 	 */
 	public static function escapeHtmlComment($s)
 	{
@@ -55,16 +99,20 @@ class Filters
 		if ($s && ($s[0] === '-' || $s[0] === '>' || $s[0] === '!')) {
 			$s = ' ' . $s;
 		}
-		return str_replace('-', '- ', $s); // dash is very problematic character in comments
+		$s = str_replace('--', '- - ', $s);
+		if (substr($s, -1) === '-') {
+			$s .= ' ';
+		}
+		return $s;
 	}
 
 
 	/**
 	 * Escapes string for use inside XML 1.0 template.
-	 * @param  string UTF-8 encoding
-	 * @return string
+	 * @param  string plain text
+	 * @return string XML
 	 */
-	public static function escapeXML($s)
+	public static function escapeXml($s)
 	{
 		// XML 1.0: \x09 \x0A \x0D and C1 allowed directly, C0 forbidden
 		// XML 1.1: \x00 forbidden directly and as a character reference,
@@ -74,9 +122,23 @@ class Filters
 
 
 	/**
+	 * Escapes string for use inside XML attribute name.
+	 * @param  string plain text
+	 * @return string XML
+	 */
+	public static function escapeXmlAttrUnquoted($s)
+	{
+		$s = (string) $s;
+		return preg_match('#^[a-z0-9:-]+$#i', $s)
+			? $s
+			: '"' . self::escapeXml($s) . '"';
+	}
+
+
+	/**
 	 * Escapes string for use inside CSS template.
-	 * @param  string UTF-8 encoding
-	 * @return string
+	 * @param  string plain text
+	 * @return string CSS
 	 */
 	public static function escapeCss($s)
 	{
@@ -87,8 +149,8 @@ class Filters
 
 	/**
 	 * Escapes variables for use inside <script>.
-	 * @param  mixed  UTF-8 encoding
-	 * @return string
+	 * @param  mixed  plain text
+	 * @return string JSON
 	 */
 	public static function escapeJs($s)
 	{
@@ -96,31 +158,135 @@ class Filters
 			$s = $s->__toString(TRUE);
 		}
 
-		$json = json_encode($s, PHP_VERSION_ID >= 50400 ? JSON_UNESCAPED_UNICODE : 0);
+		$json = json_encode($s, JSON_UNESCAPED_UNICODE);
 		if ($error = json_last_error()) {
 			throw new \RuntimeException(PHP_VERSION_ID >= 50500 ? json_last_error_msg() : 'JSON encode error', $error);
 		}
 
-		return str_replace(array("\xe2\x80\xa8", "\xe2\x80\xa9", ']]>', '<!'), array('\u2028', '\u2029', ']]\x3E', '\x3C!'), $json);
+		return str_replace(["\xe2\x80\xa8", "\xe2\x80\xa9", ']]>', '<!'], ['\u2028', '\u2029', ']]\x3E', '\x3C!'], $json);
 	}
 
 
 	/**
 	 * Escapes string for use inside iCal template.
-	 * @param  mixed  UTF-8 encoding
+	 * @param  string plain text
 	 * @return string
 	 */
 	public static function escapeICal($s)
 	{
-		// http://www.ietf.org/rfc/rfc5545.txt
+		// https://www.ietf.org/rfc/rfc5545.txt
 		return addcslashes(preg_replace('#[\x00-\x08\x0B\x0C-\x1F]+#', '', $s), "\";\\,:\n");
 	}
 
 
 	/**
-	 * Sanitizes string for use inside href attribute.
-	 * @param  string
+	 * Escapes CSS/JS for usage in <script> and <style>..
+	 * @param  string CSS/JS
+	 * @return string HTML RAWTEXT
+	 */
+	public static function escapeHtmlRawText($s)
+	{
+		return preg_replace('#</(script|style)#i', '<\\/$1', $s);
+	}
+
+
+	/**
+	 * Converts HTML to plain text.
+	 * @param
+	 * @param  string HTML
+	 * @return string plain text
+	 */
+	public static function stripHtml(FilterInfo $info, $s)
+	{
+		if (!in_array($info->contentType, [NULL, 'html', 'xhtml', 'htmlAttr', 'xhtmlAttr', 'xml', 'xmlAttr'], TRUE)) {
+			trigger_error("Filter |stripHtml used with incompatible type " . strtoupper($info->contentType), E_USER_WARNING);
+		}
+		$info->contentType = Engine::CONTENT_TEXT;
+		return html_entity_decode(strip_tags($s), ENT_QUOTES, 'UTF-8');
+	}
+
+
+	/**
+	 * Removes tags from HTML (but remains HTML entites).
+	 * @param
+	 * @param  string HTML
+	 * @return string HTML
+	 */
+	public static function stripTags(FilterInfo $info, $s)
+	{
+		if (!in_array($info->contentType, [NULL, 'html', 'xhtml', 'htmlAttr', 'xhtmlAttr', 'xml', 'xmlAttr'], TRUE)) {
+			trigger_error("Filter |stripTags used with incompatible type " . strtoupper($info->contentType), E_USER_WARNING);
+		}
+		return strip_tags($s);
+	}
+
+
+	/**
+	 * Converts ... to ...
 	 * @return string
+	 */
+	public static function convertTo(FilterInfo $info, $dest, $s)
+	{
+		$source = $info->contentType ?: Engine::CONTENT_TEXT;
+		if ($source === $dest) {
+			return $s;
+		} elseif ($conv = self::getConvertor($source, $dest)) {
+			$info->contentType = $dest;
+			return $conv($s);
+		} else {
+			trigger_error("Filters: unable to convert content type " . strtoupper($source) . " to " . strtoupper($dest), E_USER_WARNING);
+			return $s;
+		}
+	}
+
+
+	/**
+	 * @return callable
+	 */
+	public static function getConvertor($source, $dest)
+	{
+		static $table = [
+			Engine::CONTENT_TEXT => [
+				'html' => 'escapeHtmlText', 'xhtml' => 'escapeHtmlText',
+				'htmlAttr' => 'escapeHtmlAttr', 'xhtmlAttr' => 'escapeHtmlAttr',
+				'htmlAttrJs' => 'escapeHtmlAttr', 'xhtmlAttrJs' => 'escapeHtmlAttr',
+				'htmlAttrCss' => 'escapeHtmlAttr', 'xhtmlAttrCss' => 'escapeHtmlAttr',
+				'htmlAttrUrl' => 'escapeHtmlAttr', 'xhtmlAttrUrl' => 'escapeHtmlAttr',
+				'xml' => 'escapeXml', 'xmlAttr' => 'escapeXml',
+			],
+			Engine::CONTENT_JS => [
+				'html' => 'escapeHtmlText', 'xhtml' => 'escapeHtmlText',
+				'htmlAttr' => 'escapeHtmlAttr', 'xhtmlAttr' => 'escapeHtmlAttr',
+				'htmlAttrJs' => 'escapeHtmlAttr', 'xhtmlAttrJs' => 'escapeHtmlAttr',
+				'htmlJs' => 'escapeHtmlRawText', 'xhtmlJs' => 'escapeHtmlRawText',
+			],
+			Engine::CONTENT_CSS => [
+				'html' => 'escapeHtmlText', 'xhtml' => 'escapeHtmlText',
+				'htmlAttr' => 'escapeHtmlAttr', 'xhtmlAttr' => 'escapeHtmlAttr',
+				'htmlAttrCss' => 'escapeHtmlAttr', 'xhtmlAttrCss' => 'escapeHtmlAttr',
+				'htmlCss' => 'escapeHtmlRawText', 'xhtmlCss' => 'escapeHtmlRawText',
+			],
+			Engine::CONTENT_HTML => [
+				'htmlAttr' => 'escapeHtmlAttrConv',
+				'htmlAttrJs' => 'escapeHtmlAttrConv',
+				'htmlAttrCss' => 'escapeHtmlAttrConv',
+				'htmlAttrUrl' => 'escapeHtmlAttrConv',
+			],
+			Engine::CONTENT_XHTML => [
+				'xhtmlAttr' => 'escapeHtmlAttrConv',
+				'xhtmlAttrJs' => 'escapeHtmlAttrConv',
+				'xhtmlAttrCss' => 'escapeHtmlAttrConv',
+				'xhtmlAttrUrl' => 'escapeHtmlAttrConv',
+			],
+		];
+		return isset($table[$source][$dest]) ? [__CLASS__, $table[$source][$dest]] : NULL;
+	}
+
+
+	/**
+	 * Sanitizes string for use inside href attribute.
+	 * @param  string plain text
+	 * @return string plain text
 	 */
 	public static function safeUrl($s)
 	{
@@ -130,15 +296,42 @@ class Filters
 
 	/**
 	 * Replaces all repeated white spaces with a single space.
-	 * @param  string UTF-8 encoding or 8-bit
-	 * @return string
+	 * @param
+	 * @param  string text|HTML
+	 * @return string text|HTML
 	 */
-	public static function strip($s)
+	public static function strip(FilterInfo $info, $s)
 	{
+		return in_array($info->contentType, [Engine::CONTENT_HTML, Engine::CONTENT_XHTML], TRUE)
+			? trim(self::spacelessHtml($s))
+			: trim(self::spacelessText($s));
+	}
+
+
+	/**
+	 * Replaces all repeated white spaces with a single space.
+	 * @param  string HTML
+	 * @param  int output buffering phase
+	 * @param  bool stripping mode
+	 * @return string HTML
+	 */
+	public static function spacelessHtml($s, $phase = NULL, & $strip = TRUE)
+	{
+		if ($phase & PHP_OUTPUT_HANDLER_START) {
+			$s = ltrim($s);
+		}
+		if ($phase & PHP_OUTPUT_HANDLER_FINAL) {
+			$s = rtrim($s);
+		}
 		return preg_replace_callback(
-			'#(</textarea|</pre|</script|^).*?(?=<textarea|<pre|<script|\z)#si',
-			function($m) {
-				return trim(preg_replace('#[ \t\r\n]+#', ' ', $m[0]));
+			'#[ \t\r\n]+|<(/)?(textarea|pre|script)(?=\W)#si',
+			function ($m) use (& $strip) {
+				if (empty($m[2])) {
+					return $strip ? ' ' : $m[0];
+				} else {
+					$strip = !empty($m[1]);
+					return $m[0];
+				}
 			},
 			$s
 		);
@@ -146,16 +339,30 @@ class Filters
 
 
 	/**
-	 * Indents the HTML content from the left.
-	 * @param  string UTF-8 encoding or 8-bit
+	 * Replaces all repeated white spaces with a single space.
+	 * @param  string text
+	 * @return string text
+	 */
+	public static function spacelessText($s)
+	{
+		return preg_replace('#[ \t\r\n]+#', ' ', $s);
+	}
+
+
+	/**
+	 * Indents the content from the left.
+	 * @param
+	 * @param  string text|HTML
 	 * @param  int
 	 * @param  string
-	 * @return string
+	 * @return string text|HTML
 	 */
-	public static function indent($s, $level = 1, $chars = "\t")
+	public static function indent(FilterInfo $info, $s, $level = 1, $chars = "\t")
 	{
-		if ($level >= 1) {
-			$s = preg_replace_callback('#<(textarea|pre).*?</\\1#si', function($m) {
+		if ($level < 1) {
+			// do nothing
+		} elseif (in_array($info->contentType, [Engine::CONTENT_HTML, Engine::CONTENT_XHTML], TRUE)) {
+			$s = preg_replace_callback('#<(textarea|pre).*?</\\1#si', function ($m) {
 				return strtr($m[0], " \t\r\n", "\x1F\x1E\x1D\x1A");
 			}, $s);
 			if (preg_last_error()) {
@@ -163,16 +370,31 @@ class Filters
 			}
 			$s = preg_replace('#(?:^|[\r\n]+)(?=[^\r\n])#', '$0' . str_repeat($chars, $level), $s);
 			$s = strtr($s, "\x1F\x1E\x1D\x1A", " \t\r\n");
+		} else {
+			$s = preg_replace('#(?:^|[\r\n]+)(?=[^\r\n])#', '$0' . str_repeat($chars, $level), $s);
 		}
 		return $s;
 	}
 
 
 	/**
-	 * Date/time formatting.
-	 * @param  string|int|DateTime|DateInterval
+	 * Repeats text.
+	 * @param
 	 * @param  string
-	 * @return string
+	 * @param  int
+	 * @return string plain text
+	 */
+	public static function repeat(FilterInfo $info, $s, $count)
+	{
+		return str_repeat($s, $count);
+	}
+
+
+	/**
+	 * Date/time formatting.
+	 * @param  string|int|\DateTime|\DateTimeInterface|\DateInterval
+	 * @param  string
+	 * @return string plain text
 	 */
 	public static function date($time, $format = NULL)
 	{
@@ -204,12 +426,12 @@ class Filters
 	 * Converts to human readable file size.
 	 * @param  int
 	 * @param  int
-	 * @return string
+	 * @return string plain text
 	 */
 	public static function bytes($bytes, $precision = 2)
 	{
 		$bytes = round($bytes);
-		$units = array('B', 'kB', 'MB', 'GB', 'TB', 'PB');
+		$units = ['B', 'kB', 'MB', 'GB', 'TB', 'PB'];
 		foreach ($units as $unit) {
 			if (abs($bytes) < 1024 || $unit === end($units)) {
 				break;
@@ -222,12 +444,13 @@ class Filters
 
 	/**
 	 * Performs a search and replace.
+	 * @param
 	 * @param  string
 	 * @param  string
 	 * @param  string
 	 * @return string
 	 */
-	public static function replace($subject, $search, $replacement = '')
+	public static function replace(FilterInfo $info, $subject, $search, $replacement = '')
 	{
 		return str_replace($search, $replacement, $subject);
 	}
@@ -251,9 +474,9 @@ class Filters
 
 	/**
 	 * The data: URI generator.
+	 * @param  string plain text
 	 * @param  string
-	 * @param  string
-	 * @return string
+	 * @return string plain text
 	 */
 	public static function dataStream($data, $type = NULL)
 	{
@@ -270,12 +493,23 @@ class Filters
 	 */
 	public static function nl2br($value)
 	{
+		trigger_error('Filter |nl2br is deprecated, use |breaklines which correctly handles escaping.', E_USER_DEPRECATED);
 		return nl2br($value, self::$xhtml);
 	}
 
 
 	/**
-	 * Returns a part of UTF-8 string.
+	 * @param  string plain text
+	 * @return Html
+	 */
+	public static function breaklines($s)
+	{
+		return new Html(nl2br(htmlSpecialChars($s, ENT_NOQUOTES, 'UTF-8'), self::$xhtml));
+	}
+
+
+	/**
+	 * Returns a part of string.
 	 * @param  string
 	 * @param  int
 	 * @param  int
@@ -284,7 +518,7 @@ class Filters
 	public static function substring($s, $start, $length = NULL)
 	{
 		if ($length === NULL) {
-			$length = self::length($s);
+			$length = strlen(utf8_decode($s));
 		}
 		if (function_exists('mb_substr')) {
 			return mb_substr($s, $start, $length, 'UTF-8'); // MB is much faster
@@ -295,15 +529,15 @@ class Filters
 
 	/**
 	 * Truncates string to maximal length.
-	 * @param  string  UTF-8 encoding
+	 * @param  string plain text
 	 * @param  int
-	 * @param  string  UTF-8 encoding
-	 * @return string
+	 * @param  string plain text
+	 * @return string plain text
 	 */
 	public static function truncate($s, $maxLen, $append = "\xE2\x80\xA6")
 	{
-		if (self::length($s) > $maxLen) {
-			$maxLen = $maxLen - self::length($append);
+		if (strlen(utf8_decode($s)) > $maxLen) {
+			$maxLen = $maxLen - strlen(utf8_decode($append));
 			if ($maxLen < 1) {
 				return $append;
 
@@ -320,7 +554,8 @@ class Filters
 
 	/**
 	 * Convert to lower case.
-	 * @return string
+	 * @param  string plain text
+	 * @return string plain text
 	 */
 	public static function lower($s)
 	{
@@ -330,7 +565,8 @@ class Filters
 
 	/**
 	 * Convert to upper case.
-	 * @return string
+	 * @param  string plain text
+	 * @return string plain text
 	 */
 	public static function upper($s)
 	{
@@ -340,7 +576,8 @@ class Filters
 
 	/**
 	 * Convert first character to upper case.
-	 * @return string
+	 * @param  string plain text
+	 * @return string plain text
 	 */
 	public static function firstUpper($s)
 	{
@@ -350,7 +587,8 @@ class Filters
 
 	/**
 	 * Capitalize string.
-	 * @return string
+	 * @param  string plain text
+	 * @return string plain text
 	 */
 	public static function capitalize($s)
 	{
@@ -359,20 +597,27 @@ class Filters
 
 
 	/**
-	 * Returns UTF-8 string length.
+	 * Returns string length.
+	 * @param  array|\Countable|\Traversable|string
 	 * @return int
 	 */
-	public static function length($s)
+	public static function length($val)
 	{
-		return strlen(utf8_decode($s)); // fastest way
+		if (is_array($val) || $val instanceof \Countable) {
+			return count($val);
+		} elseif ($val instanceof \Traversable) {
+			return iterator_count($val);
+		} else {
+			return strlen(utf8_decode($val)); // fastest way
+		}
 	}
 
 
 	/**
 	 * Strips whitespace.
-	 * @param  string  UTF-8 encoding
-	 * @param  string
-	 * @return string
+	 * @param  string plain text
+	 * @param  string plain text
+	 * @return string plain text
 	 */
 	public static function trim($s, $charlist = " \t\n\r\0\x0B\xC2\xA0")
 	{
@@ -427,8 +672,12 @@ class Filters
 			}
 
 			$q = strpos($value, '"') === FALSE ? '"' : "'";
-			$s .= ' ' . $key . '='
-				. $q . str_replace(array('&', $q), array('&amp;', $q === '"' ? '&quot;' : '&#39;'), $value)
+			$s .= ' ' . $key . '=' . $q
+				. str_replace(
+					['&', $q, '<'],
+					['&amp;', $q === '"' ? '&quot;' : '&#39;', self::$xhtml ? '&lt;' : '<'],
+					$value
+				)
 				. (strpos($value, '`') !== FALSE && strpbrk($value, ' <>"\'') === FALSE ? ' ' : '')
 				. $q;
 		}

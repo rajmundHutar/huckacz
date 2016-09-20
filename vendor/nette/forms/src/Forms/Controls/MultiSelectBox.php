@@ -1,8 +1,8 @@
 <?php
 
 /**
- * This file is part of the Nette Framework (http://nette.org)
- * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
+ * This file is part of the Nette Framework (https://nette.org)
+ * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 
 namespace Nette\Forms\Controls;
@@ -12,13 +12,21 @@ use Nette;
 
 /**
  * Select box control that allows multiple items selection.
- *
- * @author     David Grudl
  */
 class MultiSelectBox extends MultiChoiceControl
 {
 	/** @var array of option / optgroup */
-	private $options = array();
+	private $options = [];
+
+	/** @var array */
+	private $optionAttributes = [];
+
+
+	public function __construct($label = NULL, array $items = NULL)
+	{
+		parent::__construct($label, $items);
+		$this->setOption('type', 'select');
+	}
 
 
 	/**
@@ -28,7 +36,7 @@ class MultiSelectBox extends MultiChoiceControl
 	public function setItems(array $items, $useKeys = TRUE)
 	{
 		if (!$useKeys) {
-			$res = array();
+			$res = [];
 			foreach ($items as $key => $value) {
 				unset($items[$key]);
 				if (is_array($value)) {
@@ -52,18 +60,28 @@ class MultiSelectBox extends MultiChoiceControl
 	 */
 	public function getControl()
 	{
-		$items = array();
+		$items = [];
 		foreach ($this->options as $key => $value) {
 			$items[is_array($value) ? $this->translate($key) : $key] = $this->translate($value);
 		}
 
 		return Nette\Forms\Helpers::createSelectBox(
 			$items,
-			array(
+			[
 				'selected?' => $this->value,
-				'disabled:' => is_array($this->disabled) ? $this->disabled : NULL
-			)
+				'disabled:' => is_array($this->disabled) ? $this->disabled : NULL,
+			] + $this->optionAttributes
 		)->addAttributes(parent::getControl()->attrs)->multiple(TRUE);
+	}
+
+
+	/**
+	 * @return self
+	 */
+	public function addOptionAttributes(array $attributes)
+	{
+		$this->optionAttributes = $attributes + $this->optionAttributes;
+		return $this;
 	}
 
 }

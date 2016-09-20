@@ -1,8 +1,8 @@
 <?php
 
 /**
- * This file is part of the Nette Framework (http://nette.org)
- * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
+ * This file is part of the Nette Framework (https://nette.org)
+ * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 
 namespace Nette\Http;
@@ -29,8 +29,6 @@ use Nette;
  * - baseUrl:     http://user:password@nette.org:8042/en/
  * - relativeUrl: manual.php
  *
- * @author     David Grudl
- *
  * @property   string $scheme
  * @property   string $user
  * @property   string $password
@@ -47,16 +45,18 @@ use Nette;
  * @property-read string $relativeUrl
  * @property-read array $queryParameters
  */
-class Url extends Nette\Object
+class Url implements \JsonSerializable
 {
+	use Nette\SmartObject;
+
 	/** @var array */
-	public static $defaultPorts = array(
+	public static $defaultPorts = [
 		'http' => 80,
 		'https' => 443,
 		'ftp' => 21,
 		'news' => 119,
 		'nntp' => 119,
-	);
+	];
 
 	/** @var string */
 	private $scheme = '';
@@ -70,14 +70,14 @@ class Url extends Nette\Object
 	/** @var string */
 	private $host = '';
 
-	/** @var int */
+	/** @var int|NULL */
 	private $port;
 
 	/** @var string */
 	private $path = '';
 
 	/** @var array */
-	private $query = array();
+	private $query = [];
 
 	/** @var string */
 	private $fragment = '';
@@ -101,7 +101,7 @@ class Url extends Nette\Object
 			$this->user = isset($p['user']) ? rawurldecode($p['user']) : '';
 			$this->password = isset($p['pass']) ? rawurldecode($p['pass']) : '';
 			$this->setPath(isset($p['path']) ? $p['path'] : '');
-			$this->setQuery(isset($p['query']) ? $p['query'] : array());
+			$this->setQuery(isset($p['query']) ? $p['query'] : []);
 			$this->fragment = isset($p['fragment']) ? rawurldecode($p['fragment']) : '';
 
 		} elseif ($url instanceof self) {
@@ -215,7 +215,7 @@ class Url extends Nette\Object
 
 	/**
 	 * Returns the port part of URI.
-	 * @return int
+	 * @return int|NULL
 	 */
 	public function getPort()
 	{
@@ -282,9 +282,6 @@ class Url extends Nette\Object
 	 */
 	public function getQuery()
 	{
-		if (PHP_VERSION_ID < 50400) {
-			return str_replace('+', '%20', http_build_query($this->query, '', '&'));
-		}
 		return http_build_query($this->query, '', '&', PHP_QUERY_RFC3986);
 	}
 
@@ -423,10 +420,10 @@ class Url extends Nette\Object
 	{
 		$url = new self($url);
 		$query = $url->query;
-		sort($query);
+		ksort($query);
 		$query2 = $this->query;
-		sort($query2);
-		$http = in_array($this->scheme, array('http', 'https'), TRUE);
+		ksort($query2);
+		$http = in_array($this->scheme, ['http', 'https'], TRUE);
 		return $url->scheme === $this->scheme
 			&& !strcasecmp($url->host, $this->host)
 			&& $url->getPort() === $this->getPort()
@@ -446,7 +443,7 @@ class Url extends Nette\Object
 	{
 		$this->path = preg_replace_callback(
 			'#[^!$&\'()*+,/:;=@%]+#',
-			function($m) { return rawurlencode($m[0]); },
+			function ($m) { return rawurlencode($m[0]); },
 			self::unescape($this->path, '%/')
 		);
 		$this->host = strtolower($this->host);
@@ -458,6 +455,15 @@ class Url extends Nette\Object
 	 * @return string
 	 */
 	public function __toString()
+	{
+		return $this->getAbsoluteUrl();
+	}
+
+
+	/**
+	 * @return string
+	 */
+	public function jsonSerialize()
 	{
 		return $this->getAbsoluteUrl();
 	}
@@ -477,7 +483,7 @@ class Url extends Nette\Object
 		if ($reserved !== '') {
 			$s = preg_replace_callback(
 				'#%(' . substr(chunk_split(bin2hex($reserved), 2, '|'), 0, -1) . ')#i',
-				function($m) { return '%25' . strtoupper($m[1]); },
+				function ($m) { return '%25' . strtoupper($m[1]); },
 				$s
 			);
 		}
@@ -492,9 +498,6 @@ class Url extends Nette\Object
 	public static function parseQuery($s)
 	{
 		parse_str($s, $res);
-		if (get_magic_quotes_gpc()) { // for PHP 5.3
-			$res = Helpers::stripSlashes($res);
-		}
 		return $res;
 	}
 

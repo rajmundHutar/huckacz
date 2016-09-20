@@ -1,13 +1,13 @@
 <?php
 
 /**
- * This file is part of the Nette Framework (http://nette.org)
- * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
+ * This file is part of the Nette Framework (https://nette.org)
+ * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 
 namespace Nette\PhpGenerator;
 
-use Nette\Object;
+use Nette;
 use Nette\Utils\Strings;
 
 
@@ -18,35 +18,35 @@ use Nette\Utils\Strings;
  * - opening tag (<?php)
  * - doc comments
  * - one or more namespaces
- *
- * @author Jakub Kulhan <jakub.kulhan@gmail.com>
  */
-class PhpFile extends Object
+class PhpFile
 {
-	/** @var string[] */
-	private $documents;
+	use Nette\SmartObject;
+
+	/** @var string|NULL */
+	private $comment;
 
 	/** @var PhpNamespace[] */
-	private $namespaces = array();
+	private $namespaces = [];
 
 
 	/**
-	 * @return string[]
+	 * @param  string|NULL
+	 * @return self
 	 */
-	public function getDocuments()
+	public function setComment($val)
 	{
-		return $this->documents;
+		$this->comment = $val ? (string) $val : NULL;
+		return $this;
 	}
 
 
 	/**
-	 * @param  string[]
-	 * @return self
+	 * @return string|NULL
 	 */
-	public function setDocuments(array $documents)
+	public function getComment()
 	{
-		$this->documents = $documents;
-		return $this;
+		return $this->comment;
 	}
 
 
@@ -54,10 +54,34 @@ class PhpFile extends Object
 	 * @param  string
 	 * @return self
 	 */
-	public function addDocument($document)
+	public function addComment($val)
 	{
-		$this->documents[] = $document;
+		$this->comment .= $this->comment ? "\n$val" : $val;
 		return $this;
+	}
+
+
+	/** @deprecated */
+	public function setDocuments(array $s)
+	{
+		trigger_error(__METHOD__ . '() is deprecated, use similar setComment()', E_USER_DEPRECATED);
+		return $this->setComment(implode("\n", $s));
+	}
+
+
+	/** @deprecated */
+	public function getDocuments()
+	{
+		trigger_error(__METHOD__ . '() is deprecated, use similar getComment()', E_USER_DEPRECATED);
+		return $this->comment ? [$this->comment] : [];
+	}
+
+
+	/** @deprecated */
+	public function addDocument($s)
+	{
+		trigger_error(__METHOD__ . '() is deprecated, use addComment()', E_USER_DEPRECATED);
+		return $this->addComment($s);
 	}
 
 
@@ -116,12 +140,12 @@ class PhpFile extends Object
 	public function __toString()
 	{
 		foreach ($this->namespaces as $namespace) {
-			$namespace->setBracketedSyntax(isset($this->namespaces[NULL]));
+			$namespace->setBracketedSyntax(count($this->namespaces) > 1 && isset($this->namespaces[NULL]));
 		}
 
 		return Strings::normalize(
 			"<?php\n"
-			. ($this->documents ? "\n" . str_replace("\n", "\n * ", "/**\n" . implode("\n", (array) $this->documents)) . "\n */\n\n" : '')
+			. ($this->comment ? "\n" . str_replace("\n", "\n * ", "/**\n" . $this->comment) . "\n */\n\n" : '')
 			. implode("\n\n", $this->namespaces)
 		) . "\n";
 	}

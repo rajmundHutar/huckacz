@@ -1,8 +1,8 @@
 <?php
 
 /**
- * This file is part of the Nette Framework (http://nette.org)
- * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
+ * This file is part of the Nette Framework (https://nette.org)
+ * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 
 namespace Nette\Security;
@@ -13,19 +13,18 @@ use Nette;
 /**
  * User authentication and authorization.
  *
- * @author     David Grudl
- *
  * @property-read bool $loggedIn
  * @property-read IIdentity $identity
  * @property-read mixed $id
  * @property-read array $roles
  * @property-read int $logoutReason
- * @property-read IUserStorage $storage
  * @property   IAuthenticator $authenticator
  * @property   IAuthorizator $authorizator
  */
-class User extends Nette\Object
+class User
 {
+	use Nette\SmartObject;
+
 	/** @deprecated */
 	const MANUAL = IUserStorage::MANUAL,
 		INACTIVITY = IUserStorage::INACTIVITY,
@@ -37,10 +36,10 @@ class User extends Nette\Object
 	/** @var string  default role for authenticated user without own identity */
 	public $authenticatedRole = 'authenticated';
 
-	/** @var callable[]  function(User $sender); Occurs when the user is successfully logged in */
+	/** @var callable[]  function (User $sender); Occurs when the user is successfully logged in */
 	public $onLoggedIn;
 
-	/** @var callable[]  function(User $sender); Occurs when the user is logged out */
+	/** @var callable[]  function (User $sender); Occurs when the user is logged out */
 	public $onLoggedOut;
 
 	/** @var IUserStorage Session storage for current user */
@@ -166,7 +165,7 @@ class User extends Nette\Object
 
 	/**
 	 * Enables log out after inactivity.
-	 * @param  string|int|DateTime number of seconds or timestamp
+	 * @param  string|int|\DateTimeInterface number of seconds or timestamp
 	 * @param  bool  log out when the browser is closed?
 	 * @param  bool  clear the identity from persistent storage?
 	 * @return self
@@ -199,11 +198,11 @@ class User extends Nette\Object
 	public function getRoles()
 	{
 		if (!$this->isLoggedIn()) {
-			return array($this->guestRole);
+			return [$this->guestRole];
 		}
 
 		$identity = $this->getIdentity();
-		return $identity && $identity->getRoles() ? $identity->getRoles() : array($this->authenticatedRole);
+		return $identity && $identity->getRoles() ? $identity->getRoles() : [$this->authenticatedRole];
 	}
 
 

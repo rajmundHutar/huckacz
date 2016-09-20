@@ -1,14 +1,14 @@
 <?php
 
 /**
- * This file is part of the Nette Framework (http://nette.org)
- * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
+ * This file is part of the Nette Framework (https://nette.org)
+ * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 
 namespace Nette\Latte;
 
-use Nette,
-	Latte;
+use Nette;
+use Latte;
 
 
 /**
@@ -20,6 +20,10 @@ class Engine extends Latte\Engine
 
 	public function __construct()
 	{
+		trigger_error(__CLASS__ . ' is deprecated, use Latte\Engine.', E_USER_DEPRECATED);
+		if (method_exists('Latte\Engine', '__construct')) {
+			parent::__construct();
+		}
 		$this->getParser()->shortNoEscape = TRUE;
 		$this->addFilter('url', 'rawurlencode');
 		foreach (array('normalize', 'toAscii', 'webalize', 'padLeft', 'padRight', 'reverse') as $name) {

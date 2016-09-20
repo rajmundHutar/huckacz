@@ -1,8 +1,8 @@
 <?php
 
 /**
- * This file is part of the Nette Framework (http://nette.org)
- * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
+ * This file is part of the Nette Framework (https://nette.org)
+ * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 
 namespace Nette\Application;
@@ -11,18 +11,18 @@ use Nette;
 
 
 /**
- * Presenter request. Immutable object.
+ * Presenter request.
  *
- * @author     David Grudl
- *
- * @property   string $presenterName
- * @property   array $parameters
- * @property   array $post
- * @property   array $files
- * @property   string|NULL $method
+ * @property string $presenterName
+ * @property array $parameters
+ * @property array $post
+ * @property array $files
+ * @property string|NULL $method
  */
-class Request extends Nette\Object
+class Request
 {
+	use Nette\SmartObject;
+
 	/** method */
 	const FORWARD = 'FORWARD';
 
@@ -36,7 +36,7 @@ class Request extends Nette\Object
 	private $method;
 
 	/** @var array */
-	private $flags = array();
+	private $flags = [];
 
 	/** @var string */
 	private $name;
@@ -59,7 +59,7 @@ class Request extends Nette\Object
 	 * @param  array   all uploaded files
 	 * @param  array   flags
 	 */
-	public function __construct($name, $method = NULL, array $params = array(), array $post = array(), array $files = array(), array $flags = array())
+	public function __construct($name, $method = NULL, array $params = [], array $post = [], array $files = [], array $flags = [])
 	{
 		$this->name = $name;
 		$this->method = $method;
@@ -206,16 +206,6 @@ class Request extends Nette\Object
 	public function isMethod($method)
 	{
 		return strcasecmp($this->method, $method) === 0;
-	}
-
-
-	/**
-	 * @deprecated
-	 */
-	public function isPost()
-	{
-		trigger_error('Method isPost() is deprecated, use isMethod(\'POST\') instead.', E_USER_DEPRECATED);
-		return strcasecmp($this->method, 'post') === 0;
 	}
 
 

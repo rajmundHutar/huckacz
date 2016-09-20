@@ -1,28 +1,25 @@
 <?php
 
 /**
- * This file is part of the Nette Framework (http://nette.org)
- * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
+ * This file is part of the Nette Framework (https://nette.org)
+ * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 
 namespace Nette\Bridges\ApplicationDI;
 
-use Nette,
-	Latte;
+use Nette;
+use Latte;
 
 
 /**
  * Latte extension for Nette DI.
- *
- * @author     David Grudl
- * @author     Petr Morávek
  */
 class LatteExtension extends Nette\DI\CompilerExtension
 {
-	public $defaults = array(
+	public $defaults = [
 		'xhtml' => FALSE,
-		'macros' => array(),
-	);
+		'macros' => [],
+	];
 
 	/** @var bool */
 	private $debugMode;
@@ -40,33 +37,24 @@ class LatteExtension extends Nette\DI\CompilerExtension
 
 	public function loadConfiguration()
 	{
-		if (!class_exists('Latte\Engine')) {
+		if (!class_exists(Latte\Engine::class)) {
 			return;
 		}
 
 		$config = $this->validateConfig($this->defaults);
-		$container = $this->getContainerBuilder();
+		$builder = $this->getContainerBuilder();
 
-		$latteFactory = $container->addDefinition($this->prefix('latteFactory'))
-			->setClass('Latte\Engine')
-			->addSetup('setTempDirectory', array($this->tempDir))
-			->addSetup('setAutoRefresh', array($this->debugMode))
-			->addSetup('setContentType', array($config['xhtml'] ? Latte\Compiler::CONTENT_XHTML : Latte\Compiler::CONTENT_HTML))
-			->addSetup('Nette\Utils\Html::$xhtml = ?', array((bool) $config['xhtml']))
-			->setImplement('Nette\Bridges\ApplicationLatte\ILatteFactory');
+		$builder->addDefinition($this->prefix('latteFactory'))
+			->setClass(Latte\Engine::class)
+			->addSetup('setTempDirectory', [$this->tempDir])
+			->addSetup('setAutoRefresh', [$this->debugMode])
+			->addSetup('setContentType', [$config['xhtml'] ? Latte\Compiler::CONTENT_XHTML : Latte\Compiler::CONTENT_HTML])
+			->addSetup('Nette\Utils\Html::$xhtml = ?', [(bool) $config['xhtml']])
+			->setImplement(Nette\Bridges\ApplicationLatte\ILatteFactory::class);
 
-		$container->addDefinition($this->prefix('templateFactory'))
-			->setClass('Nette\Application\UI\ITemplateFactory')
-			->setFactory('Nette\Bridges\ApplicationLatte\TemplateFactory');
-
-		$container->addDefinition('nette.latte')
-			->setClass('Latte\Engine')
-			->addSetup('::trigger_error', array('Service nette.latte is deprecated, implement Nette\Bridges\ApplicationLatte\ILatteFactory.', E_USER_DEPRECATED))
-			->addSetup('setTempDirectory', array($this->tempDir))
-			->addSetup('setAutoRefresh', array($this->debugMode))
-			->addSetup('setContentType', array($config['xhtml'] ? Latte\Compiler::CONTENT_XHTML : Latte\Compiler::CONTENT_HTML))
-			->addSetup('Nette\Utils\Html::$xhtml = ?', array((bool) $config['xhtml']))
-			->setAutowired(FALSE);
+		$builder->addDefinition($this->prefix('templateFactory'))
+			->setClass(Nette\Application\UI\ITemplateFactory::class)
+			->setFactory(Nette\Bridges\ApplicationLatte\TemplateFactory::class);
 
 		foreach ($config['macros'] as $macro) {
 			if (strpos($macro, '::') === FALSE && class_exists($macro)) {
@@ -75,18 +63,9 @@ class LatteExtension extends Nette\DI\CompilerExtension
 			$this->addMacro($macro);
 		}
 
-		if (class_exists('Nette\Templating\FileTemplate')) {
-			$container->addDefinition('nette.template')
-				->setFactory('Nette\Templating\FileTemplate')
-				->addSetup('::trigger_error', array('Service nette.template is deprecated.', E_USER_DEPRECATED))
-				->addSetup('registerFilter', array(new Nette\DI\Statement(array($latteFactory, 'create'))))
-				->addSetup('registerHelperLoader', array('Nette\Templating\Helpers::loader'))
-				->setAutowired(FALSE);
-		}
-
 		if ($this->name === 'latte') {
-			$container->addAlias('nette.latteFactory', $this->prefix('latteFactory'));
-			$container->addAlias('nette.templateFactory', $this->prefix('templateFactory'));
+			$builder->addAlias('nette.latteFactory', $this->prefix('latteFactory'));
+			$builder->addAlias('nette.templateFactory', $this->prefix('templateFactory'));
 		}
 	}
 
@@ -95,16 +74,11 @@ class LatteExtension extends Nette\DI\CompilerExtension
 	 * @param  callable
 	 * @return void
 	 */
-	public function addMacro($macro)
+	public function addMacro(callable $macro)
 	{
-		Nette\Utils\Validators::assert($macro, 'callable');
-
-		$container = $this->getContainerBuilder();
-		$container->getDefinition('nette.latte')
-			->addSetup('?->onCompile[] = function($engine) { ' . $macro . '($engine->getCompiler()); }', array('@self'));
-
-		$container->getDefinition($this->prefix('latteFactory'))
-			->addSetup('?->onCompile[] = function($engine) { ' . $macro . '($engine->getCompiler()); }', array('@self'));
+		$builder = $this->getContainerBuilder();
+		$builder->getDefinition($this->prefix('latteFactory'))
+			->addSetup('?->onCompile[] = function ($engine) { ' . $macro . '($engine->getCompiler()); }', ['@self']);
 	}
 
 }

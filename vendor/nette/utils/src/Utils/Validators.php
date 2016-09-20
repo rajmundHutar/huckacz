@@ -1,8 +1,8 @@
 <?php
 
 /**
- * This file is part of the Nette Framework (http://nette.org)
- * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
+ * This file is part of the Nette Framework (https://nette.org)
+ * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 
 namespace Nette\Utils;
@@ -12,35 +12,35 @@ use Nette;
 
 /**
  * Validation utilities.
- *
- * @author     David Grudl
  */
-class Validators extends Nette\Object
+class Validators
 {
-	protected static $validators = array(
+	use Nette\StaticClass;
+
+	protected static $validators = [
 		'bool' => 'is_bool',
 		'boolean' => 'is_bool',
 		'int' => 'is_int',
 		'integer' => 'is_int',
 		'float' => 'is_float',
 		'number' => NULL, // is_int || is_float,
-		'numeric' => array(__CLASS__, 'isNumeric'),
-		'numericint' => array(__CLASS__, 'isNumericInt'),
-		'string' =>  'is_string',
-		'unicode' => array(__CLASS__, 'isUnicode'),
+		'numeric' => [__CLASS__, 'isNumeric'],
+		'numericint' => [__CLASS__, 'isNumericInt'],
+		'string' => 'is_string',
+		'unicode' => [__CLASS__, 'isUnicode'],
 		'array' => 'is_array',
-		'list' => array('Nette\Utils\Arrays', 'isList'),
+		'list' => [Arrays::class, 'isList'],
 		'object' => 'is_object',
 		'resource' => 'is_resource',
 		'scalar' => 'is_scalar',
-		'callable' => array(__CLASS__, 'isCallable'),
+		'callable' => [__CLASS__, 'isCallable'],
 		'null' => 'is_null',
-		'email' => array(__CLASS__, 'isEmail'),
-		'url' => array(__CLASS__, 'isUrl'),
-		'uri' => array(__CLASS__, 'isUri'),
-		'none' => array(__CLASS__, 'isNone'),
-		'type' => array(__CLASS__, 'isType'),
-		'identifier' => array(__CLASS__, 'isPhpIdentifier'),
+		'email' => [__CLASS__, 'isEmail'],
+		'url' => [__CLASS__, 'isUrl'],
+		'uri' => [__CLASS__, 'isUri'],
+		'none' => [__CLASS__, 'isNone'],
+		'type' => [__CLASS__, 'isType'],
+		'identifier' => [__CLASS__, 'isPhpIdentifier'],
 		'pattern' => NULL,
 		'alnum' => 'ctype_alnum',
 		'alpha' => 'ctype_alpha',
@@ -49,11 +49,11 @@ class Validators extends Nette\Object
 		'upper' => 'ctype_upper',
 		'space' => 'ctype_space',
 		'xdigit' => 'ctype_xdigit',
-	);
+	];
 
-	protected static $counters = array(
-		'string' =>  'strlen',
-		'unicode' => array('Nette\Utils\Strings', 'length'),
+	protected static $counters = [
+		'string' => 'strlen',
+		'unicode' => [Strings::class, 'length'],
 		'array' => 'count',
 		'list' => 'count',
 		'alnum' => 'strlen',
@@ -63,7 +63,7 @@ class Validators extends Nette\Object
 		'space' => 'strlen',
 		'upper' => 'strlen',
 		'xdigit' => 'strlen',
-	);
+	];
 
 
 	/**
@@ -76,7 +76,7 @@ class Validators extends Nette\Object
 	public static function assert($value, $expected, $label = 'variable')
 	{
 		if (!static::is($value, $expected)) {
-			$expected = str_replace(array('|', ':'), array(' or ', ' in range '), $expected);
+			$expected = str_replace(['|', ':'], [' or ', ' in range '], $expected);
 			if (is_array($value)) {
 				$type = 'array(' . count($value) . ')';
 			} elseif (is_object($value)) {
@@ -139,14 +139,15 @@ class Validators extends Nette\Object
 			}
 
 			if (isset($item[1])) {
+				$length = $value;
 				if (isset(static::$counters[$type])) {
-					$value = call_user_func(static::$counters[$type], $value);
+					$length = call_user_func(static::$counters[$type], $value);
 				}
 				$range = explode('..', $item[1]);
 				if (!isset($range[1])) {
 					$range[1] = $range[0];
 				}
-				if (($range[0] !== '' && $value < $range[0]) || ($range[1] !== '' && $value > $range[1])) {
+				if (($range[0] !== '' && $length < $range[0]) || ($range[1] !== '' && $length > $range[1])) {
 					continue;
 				}
 			}
@@ -239,11 +240,13 @@ class Validators extends Nette\Object
 	public static function isEmail($value)
 	{
 		$atom = "[-a-z0-9!#$%&'*+/=?^_`{|}~]"; // RFC 5322 unquoted characters in local-part
-		$localPart = "(?:\"(?:[ !\\x23-\\x5B\\x5D-\\x7E]*|\\\\[ -~])+\"|$atom+(?:\\.$atom+)*)"; // quoted or unquoted
 		$alpha = "a-z\x80-\xFF"; // superset of IDN
-		$domain = "[0-9$alpha](?:[-0-9$alpha]{0,61}[0-9$alpha])?"; // RFC 1034 one domain component
-		$topDomain = "[$alpha](?:[-0-9$alpha]{0,17}[$alpha])?";
-		return (bool) preg_match("(^$localPart@(?:$domain\\.)+$topDomain\\z)i", $value);
+		return (bool) preg_match("(^
+			(\"([ !#-[\\]-~]*|\\\\[ -~])+\"|$atom+(\\.$atom+)*)  # quoted or unquoted
+			@
+			([0-9$alpha]([-0-9$alpha]{0,61}[0-9$alpha])?\\.)+    # domain - RFC 1034
+			[$alpha]([-0-9$alpha]{0,17}[$alpha])?                # top domain
+		\\z)ix", $value);
 	}
 
 
@@ -255,11 +258,16 @@ class Validators extends Nette\Object
 	public static function isUrl($value)
 	{
 		$alpha = "a-z\x80-\xFF";
-		$subDomain = "[-_0-9$alpha]";
-		$domain = "[0-9$alpha](?:[-0-9$alpha]{0,61}[0-9$alpha])?";
-		$topDomain = "[$alpha](?:[-0-9$alpha]{0,17}[$alpha])?";
-		$domainName = "(?:(?:$subDomain+\\.)*?$domain\\.)?$topDomain";
-		return (bool) preg_match("(^https?://(?:$domainName|\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}|\[[0-9a-f:]{3,39}\])(:\\d{1,5})?(/\\S*)?\\z)i", $value);
+		return (bool) preg_match("(^
+			https?://(
+				(([-_0-9$alpha]+\\.)*                       # subdomain
+					[0-9$alpha]([-0-9$alpha]{0,61}[0-9$alpha])?\\.)?  # domain
+					[$alpha]([-0-9$alpha]{0,17}[$alpha])?   # top domain
+				|\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}  # IPv4
+				|\[[0-9a-f:]{3,39}\]                        # IPv6
+			)(:\\d{1,5})?                                   # port
+			(/\\S*)?                                        # path
+		\\z)ix", $value);
 	}
 
 
@@ -281,7 +289,7 @@ class Validators extends Nette\Object
 	 */
 	public static function isType($type)
 	{
-		return class_exists($type) || interface_exists($type) || (PHP_VERSION_ID >= 50400 && trait_exists($type));
+		return class_exists($type) || interface_exists($type) || trait_exists($type);
 	}
 
 
@@ -294,12 +302,4 @@ class Validators extends Nette\Object
 		return is_string($value) && preg_match('#^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*\z#', $value);
 	}
 
-}
-
-
-/**
- * The exception that indicates assertion error.
- */
-class AssertionException extends \Exception
-{
 }

@@ -1,57 +1,68 @@
 <?php
 
 /**
- * This file is part of the Nette Framework (http://nette.org)
- * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
+ * This file is part of the Nette Framework (https://nette.org)
+ * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 
 namespace Nette\Forms\Controls;
 
-use Nette,
-	Nette\Utils\Html;
+use Nette;
+use Nette\Utils\Html;
 
 
 /**
  * Set of checkboxes.
  *
- * @author     David Grudl
- *
- * @property-read Nette\Utils\Html $separatorPrototype
+ * @property-read Html $separatorPrototype
+ * @property-read Html $containerPrototype
  */
 class CheckboxList extends MultiChoiceControl
 {
-	/** @var Nette\Utils\Html  separator element template */
+	/** @var Html  separator element template */
 	protected $separator;
 
+	/** @var Html  container element template */
+	protected $container;
 
+
+	/**
+	 * @param  string  label
+	 * @param  array   options from which to choose
+	 */
 	public function __construct($label = NULL, array $items = NULL)
 	{
 		parent::__construct($label, $items);
 		$this->control->type = 'checkbox';
+		$this->container = Html::el();
 		$this->separator = Html::el('br');
+		$this->setOption('type', 'checkbox');
 	}
 
 
 	/**
 	 * Generates control's HTML element.
-	 * @return string
+	 * @return Html
 	 */
 	public function getControl()
 	{
+		$input = parent::getControl();
 		$items = $this->getItems();
 		reset($items);
-		$input = parent::getControl();
-		return Nette\Forms\Helpers::createInputList(
-			$this->translate($items),
-			array_merge($input->attrs, array(
-				'id' => NULL,
-				'checked?' => $this->value,
-				'disabled:' => $this->disabled,
-				'required' => NULL,
-				'data-nette-rules:' => array(key($items) => $input->attrs['data-nette-rules']),
-			)),
-			$this->label->attrs,
-			$this->separator
+
+		return $this->container->setHtml(
+			Nette\Forms\Helpers::createInputList(
+				$this->translate($items),
+				array_merge($input->attrs, [
+					'id' => NULL,
+					'checked?' => $this->value,
+					'disabled:' => $this->disabled,
+					'required' => NULL,
+					'data-nette-rules:' => [key($items) => $input->attrs['data-nette-rules']],
+				]),
+				$this->label->attrs,
+				$this->separator
+			)
 		);
 	}
 
@@ -59,7 +70,7 @@ class CheckboxList extends MultiChoiceControl
 	/**
 	 * Generates label's HTML element.
 	 * @param  string
-	 * @return Nette\Utils\Html
+	 * @return Html
 	 */
 	public function getLabel($caption = NULL)
 	{
@@ -68,8 +79,35 @@ class CheckboxList extends MultiChoiceControl
 
 
 	/**
+	 * @return Html
+	 */
+	public function getControlPart($key = NULL)
+	{
+		$key = key([(string) $key => NULL]);
+		return parent::getControl()->addAttributes([
+			'id' => $this->getHtmlId() . '-' . $key,
+			'checked' => in_array($key, (array) $this->value, TRUE),
+			'disabled' => is_array($this->disabled) ? isset($this->disabled[$key]) : $this->disabled,
+			'required' => NULL,
+			'value' => $key,
+		]);
+	}
+
+
+	/**
+	 * @return Html
+	 */
+	public function getLabelPart($key = NULL)
+	{
+		return func_num_args()
+			? parent::getLabel($this->items[$key])->for($this->getHtmlId() . '-' . $key)
+			: $this->getLabel();
+	}
+
+
+	/**
 	 * Returns separator HTML element template.
-	 * @return Nette\Utils\Html
+	 * @return Html
 	 */
 	public function getSeparatorPrototype()
 	{
@@ -78,26 +116,12 @@ class CheckboxList extends MultiChoiceControl
 
 
 	/**
-	 * @return Nette\Utils\Html
+	 * Returns container HTML element template.
+	 * @return Html
 	 */
-	public function getControlPart($key)
+	public function getContainerPrototype()
 	{
-		return parent::getControl()->addAttributes(array(
-			'id' => $this->getHtmlId() . '-' . $key,
-			'checked' => in_array($key, (array) $this->value, TRUE),
-			'disabled' => is_array($this->disabled) ? isset($this->disabled[$key]) : $this->disabled,
-			'required' => NULL,
-			'value' => $key,
-		));
-	}
-
-
-	/**
-	 * @return Nette\Utils\Html
-	 */
-	public function getLabelPart($key)
-	{
-		return parent::getLabel($this->items[$key])->for($this->getHtmlId() . '-' . $key);
+		return $this->container;
 	}
 
 }

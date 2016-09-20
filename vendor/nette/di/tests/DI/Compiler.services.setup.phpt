@@ -1,0 +1,80 @@
+<?php
+
+/**
+ * Test: Nette\DI\Compiler: services setup.
+ */
+
+use Nette\DI;
+use Tester\Assert;
+
+
+require __DIR__ . '/../bootstrap.php';
+
+
+class Lorem
+{
+	function test(...$args)
+	{
+		Notes::add(__METHOD__ . ' ' . implode(' ', $args));
+	}
+}
+
+
+class Ipsum
+{
+	public static $staticTest;
+
+	public static $instances;
+
+	public $test;
+
+	function __construct(...$args)
+	{
+		$this->args = $args;
+		self::$instances[] = $this;
+	}
+
+	function test(...$args)
+	{
+		Notes::add(__METHOD__ . ' ' . implode(' ', $args) . ' ' . implode(' ', $this->args));
+	}
+
+	static function staticTest(...$args)
+	{
+		Notes::add(__METHOD__ . ' ' . implode(' ', $args));
+	}
+}
+
+
+function globtest(...$args)
+{
+	Notes::add(__METHOD__ . ' ' . implode(' ', $args));
+}
+
+
+$container = createContainer(new DI\Compiler, 'files/compiler.services.setup.neon');
+
+
+Assert::same([
+], Notes::fetch());
+
+Assert::type(Lorem::class, $container->getService('lorem'));
+
+Assert::same([
+	'Lorem::test 2',
+	'Lorem::test 3',
+	'Lorem::test 4',
+	'Ipsum::staticTest 5',
+	'Ipsum::test 6 ',
+	'globtest 7',
+	'Ipsum::test  a',
+	'Ipsum::test 10 b',
+], Notes::fetch());
+
+Assert::same(8, $container->getService('lorem')->test);
+Assert::same(9, Ipsum::$staticTest);
+Assert::equal(new Lorem, $container->getService('ipsum')->test);
+Assert::same([1, 2], $container->getService('lorem')->arr);
+
+Assert::count(4, Ipsum::$instances);
+Assert::same([$container->getService('lorem')], Ipsum::$instances[3]->args);

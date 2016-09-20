@@ -1,8 +1,8 @@
 <?php
 
 /**
- * This file is part of the Nette Framework (http://nette.org)
- * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
+ * This file is part of the Nette Framework (https://nette.org)
+ * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 
 namespace Nette\Forms\Controls;
@@ -12,8 +12,6 @@ use Nette;
 
 /**
  * Push button control with no default behavior.
- *
- * @author     David Grudl
  */
 class Button extends BaseControl
 {
@@ -25,6 +23,7 @@ class Button extends BaseControl
 	{
 		parent::__construct($caption);
 		$this->control->type = 'button';
+		$this->setOption('type', 'button');
 	}
 
 
@@ -35,7 +34,7 @@ class Button extends BaseControl
 	public function isFilled()
 	{
 		$value = $this->getValue();
-		return $value !== NULL && $value !== array();
+		return $value !== NULL && $value !== [];
 	}
 
 
@@ -58,11 +57,11 @@ class Button extends BaseControl
 	{
 		$this->setOption('rendered', TRUE);
 		$el = clone $this->control;
-		return $el->addAttributes(array(
+		return $el->addAttributes([
 			'name' => $this->getHtmlName(),
 			'disabled' => $this->isDisabled(),
 			'value' => $this->translate($caption === NULL ? $this->caption : $caption),
-		));
+		]);
 	}
 
 }

@@ -1,8 +1,8 @@
 <?php
 
 /**
- * This file is part of the Nette Framework (http://nette.org)
- * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
+ * This file is part of the Nette Framework (https://nette.org)
+ * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 
 namespace Nette\Utils;
@@ -12,22 +12,22 @@ use Nette;
 
 /**
  * DateTime.
- *
- * @author     David Grudl
  */
-class DateTime extends \DateTime
+class DateTime extends \DateTime implements \JsonSerializable
 {
+	use Nette\SmartObject;
+
 	/** minute in seconds */
 	const MINUTE = 60;
 
 	/** hour in seconds */
-	const HOUR = 3600;
+	const HOUR = 60 * self::MINUTE;
 
 	/** day in seconds */
-	const DAY = 86400;
+	const DAY = 24 * self::HOUR;
 
 	/** week in seconds */
-	const WEEK = 604800;
+	const WEEK = 7 * self::DAY;
 
 	/** average month in seconds */
 	const MONTH = 2629800;
@@ -38,20 +38,19 @@ class DateTime extends \DateTime
 
 	/**
 	 * DateTime object factory.
-	 * @param  string|int|\DateTime
-	 * @return DateTime
+	 * @param  string|int|\DateTimeInterface
+	 * @return self
 	 */
 	public static function from($time)
 	{
-		if ($time instanceof \DateTime || $time instanceof \DateTimeInterface) {
+		if ($time instanceof \DateTimeInterface) {
 			return new static($time->format('Y-m-d H:i:s'), $time->getTimezone());
 
 		} elseif (is_numeric($time)) {
 			if ($time <= self::YEAR) {
 				$time += time();
 			}
-			$tmp = new static('@' . $time);
-			return $tmp->setTimeZone(new \DateTimeZone(date_default_timezone_get()));
+			return (new static('@' . $time))->setTimeZone(new \DateTimeZone(date_default_timezone_get()));
 
 		} else { // textual or NULL
 			return new static($time);
@@ -106,7 +105,7 @@ class DateTime extends \DateTime
 	 * @param string The format the $time parameter should be in
 	 * @param string String representing the time
 	 * @param string|\DateTimeZone desired timezone (default timezone is used if NULL is passed)
-	 * @return DateTime|FALSE
+	 * @return self|FALSE
 	 */
 	public static function createFromFormat($format, $time, $timezone = NULL)
 	{
@@ -122,6 +121,16 @@ class DateTime extends \DateTime
 
 		$date = parent::createFromFormat($format, $time, $timezone);
 		return $date ? static::from($date) : FALSE;
+	}
+
+
+	/**
+	 * Returns JSON representation in ISO 8601 (used by JavaScript).
+	 * @return string
+	 */
+	public function jsonSerialize()
+	{
+		return $this->format('c');
 	}
 
 }

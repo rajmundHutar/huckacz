@@ -1,8 +1,8 @@
 <?php
 
 /**
- * This file is part of the Nette Framework (http://nette.org)
- * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
+ * This file is part of the Nette Framework (https://nette.org)
+ * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 
 namespace Nette\Forms\Controls;
@@ -13,16 +13,16 @@ use Nette;
 /**
  * Choice control that allows multiple items selection.
  *
- * @author     David Grudl
- *
  * @property   array $items
  * @property-read array $selectedItems
- * @property-read array $rawValue
  */
 abstract class MultiChoiceControl extends BaseControl
 {
+	/** @var bool */
+	public $checkAllowedValues = TRUE;
+
 	/** @var array */
-	private $items = array();
+	private $items = [];
 
 
 	public function __construct($label = NULL, array $items = NULL)
@@ -51,6 +51,7 @@ abstract class MultiChoiceControl extends BaseControl
 	 * Sets selected items (by keys).
 	 * @param  array
 	 * @return self
+	 * @internal
 	 */
 	public function setValue($values)
 	{
@@ -59,7 +60,7 @@ abstract class MultiChoiceControl extends BaseControl
 		} elseif (!is_array($values)) {
 			throw new Nette\InvalidArgumentException(sprintf("Value must be array or NULL, %s given in field '%s'.", gettype($values), $this->name));
 		}
-		$flip = array();
+		$flip = [];
 		foreach ($values as $value) {
 			if (!is_scalar($value) && !method_exists($value, '__toString')) {
 				throw new Nette\InvalidArgumentException(sprintf("Values must be scalar, %s given in field '%s'.", gettype($value), $this->name));
@@ -67,10 +68,10 @@ abstract class MultiChoiceControl extends BaseControl
 			$flip[(string) $value] = TRUE;
 		}
 		$values = array_keys($flip);
-		if ($diff = array_diff($values, array_keys($this->items))) {
-			$range = Nette\Utils\Strings::truncate(implode(', ', array_map(function($s) { return var_export($s, TRUE); }, array_keys($this->items))), 70, '...');
+		if ($this->checkAllowedValues && ($diff = array_diff($values, array_keys($this->items)))) {
+			$set = Nette\Utils\Strings::truncate(implode(', ', array_map(function ($s) { return var_export($s, TRUE); }, array_keys($this->items))), 70, '...');
 			$vals = (count($diff) > 1 ? 's' : '') . " '" . implode("', '", $diff) . "'";
-			throw new Nette\InvalidArgumentException("Value$vals are out of allowed range [$range] in field '{$this->name}'.");
+			throw new Nette\InvalidArgumentException("Value$vals are out of allowed set [$set] in field '{$this->name}'.");
 		}
 		$this->value = $values;
 		return $this;
@@ -103,7 +104,7 @@ abstract class MultiChoiceControl extends BaseControl
 	 */
 	public function isFilled()
 	{
-		return $this->getValue() !== array();
+		return $this->getValue() !== [];
 	}
 
 

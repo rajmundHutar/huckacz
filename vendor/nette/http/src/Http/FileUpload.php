@@ -1,8 +1,8 @@
 <?php
 
 /**
- * This file is part of the Nette Framework (http://nette.org)
- * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
+ * This file is part of the Nette Framework (https://nette.org)
+ * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 
 namespace Nette\Http;
@@ -13,8 +13,6 @@ use Nette;
 /**
  * Provides access to individual files that have been uploaded by a client.
  *
- * @author     David Grudl
- *
  * @property-read string $name
  * @property-read string $sanitizedName
  * @property-read string|NULL $contentType
@@ -22,12 +20,12 @@ use Nette;
  * @property-read string $temporaryFile
  * @property-read int $error
  * @property-read bool $ok
- * @property-read bool $image
- * @property-read array|NULL $imageSize
  * @property-read string|NULL $contents
  */
-class FileUpload extends Nette\Object
+class FileUpload
 {
+	use Nette\SmartObject;
+
 	/** @var string */
 	private $name;
 
@@ -46,7 +44,7 @@ class FileUpload extends Nette\Object
 
 	public function __construct($value)
 	{
-		foreach (array('name', 'type', 'size', 'tmp_name', 'error') as $key) {
+		foreach (['name', 'type', 'size', 'tmp_name', 'error'] as $key) {
 			if (!isset($value[$key]) || !is_scalar($value[$key])) {
 				$this->error = UPLOAD_ERR_NO_FILE;
 				return; // or throw exception?
@@ -149,12 +147,20 @@ class FileUpload extends Nette\Object
 	 */
 	public function move($dest)
 	{
-		@mkdir(dirname($dest), 0777, TRUE); // @ - dir may already exist
-		@unlink($dest); // @ - file may not exists
-		if (!call_user_func(is_uploaded_file($this->tmpName) ? 'move_uploaded_file' : 'rename', $this->tmpName, $dest)) {
-			throw new Nette\InvalidStateException("Unable to move uploaded file '$this->tmpName' to '$dest'.");
+		$dir = dirname($dest);
+		@mkdir($dir, 0777, TRUE); // @ - dir may already exist
+		if (!is_dir($dir)) {
+			throw new Nette\InvalidStateException("Directory '$dir' cannot be created. " . error_get_last()['message']);
 		}
-		chmod($dest, 0666);
+		@unlink($dest); // @ - file may not exists
+		Nette\Utils\Callback::invokeSafe(
+			is_uploaded_file($this->tmpName) ? 'move_uploaded_file' : 'rename',
+			[$this->tmpName, $dest],
+			function ($message) {
+				throw new Nette\InvalidStateException("Unable to move uploaded file '$this->tmpName' to '$dest'. $message");
+			}
+		);
+		@chmod($dest, 0666); // @ - possible low permission to chmod
 		$this->tmpName = $dest;
 		return $this;
 	}
@@ -166,7 +172,7 @@ class FileUpload extends Nette\Object
 	 */
 	public function isImage()
 	{
-		return in_array($this->getContentType(), array('image/gif', 'image/png', 'image/jpeg'), TRUE);
+		return in_array($this->getContentType(), ['image/gif', 'image/png', 'image/jpeg'], TRUE);
 	}
 
 

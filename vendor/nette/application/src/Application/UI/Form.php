@@ -1,8 +1,8 @@
 <?php
 
 /**
- * This file is part of the Nette Framework (http://nette.org)
- * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
+ * This file is part of the Nette Framework (https://nette.org)
+ * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 
 namespace Nette\Application\UI;
@@ -12,13 +12,11 @@ use Nette;
 
 /**
  * Web form adapted for Presenter.
- *
- * @author     David Grudl
- *
- * @property-read Presenter $presenter
  */
 class Form extends Nette\Forms\Form implements ISignalReceiver
 {
+	/** @var callable[]  function (self $sender); Occurs when form is attached to presenter */
+	public $onAnchor;
 
 	/**
 	 * Application form constructor.
@@ -38,7 +36,7 @@ class Form extends Nette\Forms\Form implements ISignalReceiver
 	protected function validateParent(Nette\ComponentModel\IContainer $parent)
 	{
 		parent::validateParent($parent);
-		$this->monitor('Nette\Application\UI\Presenter');
+		$this->monitor(Presenter::class);
 	}
 
 
@@ -49,7 +47,7 @@ class Form extends Nette\Forms\Form implements ISignalReceiver
 	 */
 	public function getPresenter($need = TRUE)
 	{
-		return $this->lookup('Nette\Application\UI\Presenter', $need);
+		return $this->lookup(Presenter::class, $need);
 	}
 
 
@@ -62,26 +60,23 @@ class Form extends Nette\Forms\Form implements ISignalReceiver
 	protected function attached($presenter)
 	{
 		if ($presenter instanceof Presenter) {
-			$name = $this->lookupPath('Nette\Application\UI\Presenter');
-
 			if (!isset($this->getElementPrototype()->id)) {
-				$this->getElementPrototype()->id = 'frm-' . $name;
+				$this->getElementPrototype()->id = 'frm-' . $this->lookupPath(Presenter::class);
+			}
+			if (!$this->getAction()) {
+				$this->setAction(new Link($presenter, 'this'));
 			}
 
-			if (iterator_count($this->getControls()) && $this->isSubmitted()) {
-				foreach ($this->getControls() as $control) {
+			$controls = $this->getControls();
+			if (iterator_count($controls) && $this->isSubmitted()) {
+				foreach ($controls as $control) {
 					if (!$control->isDisabled()) {
 						$control->loadHttpData();
 					}
 				}
 			}
 
-			if (!$this->getAction()) {
-				$this->setAction(new Link($presenter, 'this', array()));
-				$signal = new Nette\Forms\Controls\HiddenField($name . self::NAME_SEPARATOR . 'submit');
-				$signal->setOmitted()->setHtmlId(FALSE);
-				$this[Presenter::SIGNAL_KEY] = $signal;
-			}
+			$this->onAnchor($this);
 		}
 		parent::attached($presenter);
 	}
@@ -108,16 +103,26 @@ class Form extends Nette\Forms\Form implements ISignalReceiver
 			return;
 		}
 
-		$isPost = $this->getMethod() === self::POST;
 		$request = $presenter->getRequest();
-		if ($request->isMethod('forward') || $request->isMethod('post') !== $isPost) {
+		if ($request->isMethod('forward') || $request->isMethod('post') !== $this->isMethod('post')) {
 			return;
 		}
 
-		if ($isPost) {
+		if ($this->isMethod('post')) {
 			return Nette\Utils\Arrays::mergeTree($request->getPost(), $request->getFiles());
 		} else {
 			return $request->getParameters();
+		}
+	}
+
+
+	protected function beforeRender()
+	{
+		parent::beforeRender();
+		$key = ($this->isMethod('post') ? '_' : '') . Presenter::SIGNAL_KEY;
+		if (!isset($this[$key])) {
+			$do = $this->lookupPath(Presenter::class) . self::NAME_SEPARATOR . 'submit';
+			$this[$key] = (new Nette\Forms\Controls\HiddenField($do))->setOmitted()->setHtmlId(FALSE);
 		}
 	}
 

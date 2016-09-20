@@ -1,23 +1,19 @@
 <?php
 
 /**
- * This file is part of the Nette Framework (http://nette.org)
- * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
+ * This file is part of the Nette Framework (https://nette.org)
+ * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 
 namespace Nette\Forms\Controls;
 
-use Nette,
-	Nette\Forms\Form,
-	Nette\Utils\Strings;
+use Nette;
+use Nette\Forms\Form;
+use Nette\Utils\Strings;
 
 
 /**
  * Implements the basic functionality common to text input controls.
- *
- * @author     David Grudl
- *
- * @property   string $emptyValue
  */
 abstract class TextBase extends BaseControl
 {
@@ -27,11 +23,15 @@ abstract class TextBase extends BaseControl
 	/** @var mixed unfiltered submitted value */
 	protected $rawValue = '';
 
+	/** @var bool */
+	private $nullable;
+
 
 	/**
 	 * Sets control's value.
 	 * @param  string
 	 * @return self
+	 * @internal
 	 */
 	public function setValue($value)
 	{
@@ -51,7 +51,19 @@ abstract class TextBase extends BaseControl
 	 */
 	public function getValue()
 	{
-		return $this->value === Strings::trim($this->translate($this->emptyValue)) ? '' : $this->value;
+		return $this->nullable && $this->value === '' ? NULL : $this->value;
+	}
+
+
+	/**
+	 * Sets whether getValue() returns NULL instead of empty string.
+	 * @param  bool
+	 * @return self
+	 */
+	public function setNullable($value = TRUE)
+	{
+		$this->nullable = (bool) $value;
+		return $this;
 	}
 
 
@@ -96,7 +108,7 @@ abstract class TextBase extends BaseControl
 	 */
 	public function addFilter($filter)
 	{
-		$this->rules->addFilter($filter);
+		$this->getRules()->addFilter($filter);
 		return $this;
 	}
 
@@ -114,6 +126,17 @@ abstract class TextBase extends BaseControl
 	}
 
 
+	/**
+	 * @return string|NULL
+	 */
+	protected function getRenderedValue()
+	{
+		return $this->rawValue === ''
+			? ($this->emptyValue === '' ? NULL : $this->translate($this->emptyValue))
+			: $this->rawValue;
+	}
+
+
 	public function addRule($validator, $message = NULL, $arg = NULL)
 	{
 		if ($validator === Form::LENGTH || $validator === Form::MAX_LENGTH) {
@@ -123,6 +146,19 @@ abstract class TextBase extends BaseControl
 			}
 		}
 		return parent::addRule($validator, $message, $arg);
+	}
+
+
+	/**
+	 * Performs the server side validation.
+	 * @return void
+	 */
+	public function validate()
+	{
+		if ($this->value === Strings::trim($this->translate($this->emptyValue))) {
+			$this->value = '';
+		}
+		parent::validate();
 	}
 
 }

@@ -1,14 +1,14 @@
 <?php
 
 /**
- * This file is part of the Nette Framework (http://nette.org)
- * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
+ * This file is part of the Nette Framework (https://nette.org)
+ * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 
 namespace Nette\PhpGenerator;
 
+use Nette;
 use Nette\InvalidStateException;
-use Nette\Object;
 use Nette\Utils\Strings;
 
 
@@ -19,11 +19,11 @@ use Nette\Utils\Strings;
  * - namespace statement
  * - variable amount of use statements
  * - one or more class declarations
- *
- * @author Jakub Kulhan <jakub.kulhan@gmail.com>
  */
-class PhpNamespace extends Object
+class PhpNamespace
 {
+	use Nette\SmartObject;
+
 	/** @var string */
 	private $name;
 
@@ -31,10 +31,10 @@ class PhpNamespace extends Object
 	private $bracketedSyntax = FALSE;
 
 	/** @var string[] */
-	private $uses = array();
+	private $uses = [];
 
 	/** @var ClassType[] */
-	private $classes = array();
+	private $classes = [];
 
 
 	public function __construct($name = NULL)
@@ -43,19 +43,7 @@ class PhpNamespace extends Object
 	}
 
 
-	/**
-	 * @return string
-	 */
-	public function getName()
-	{
-		return $this->name;
-	}
-
-
-	/**
-	 * @param  string
-	 * @return self
-	 */
+	/** @deprecated */
 	public function setName($name)
 	{
 		$this->name = (string) $name;
@@ -64,11 +52,11 @@ class PhpNamespace extends Object
 
 
 	/**
-	 * @return bool
+	 * @return string|NULL
 	 */
-	public function getBracketedSyntax()
+	public function getName()
 	{
-		return $this->bracketedSyntax;
+		return $this->name ?: NULL;
 	}
 
 
@@ -85,11 +73,11 @@ class PhpNamespace extends Object
 
 
 	/**
-	 * @return string[]
+	 * @return bool
 	 */
-	public function getUses()
+	public function getBracketedSyntax()
 	{
-		return $this->uses;
+		return $this->bracketedSyntax;
 	}
 
 
@@ -131,11 +119,23 @@ class PhpNamespace extends Object
 
 
 	/**
+	 * @return string[]
+	 */
+	public function getUses()
+	{
+		return $this->uses;
+	}
+
+
+	/**
 	 * @param  string
 	 * @return string
 	 */
 	public function unresolveName($name)
 	{
+		if (in_array(strtolower($name), ['self', 'parent', 'array', 'callable', 'string', 'bool', 'float', 'int', ''], TRUE)) {
+			return $name;
+		}
 		$name = ltrim($name, '\\');
 		$res = NULL;
 		$lower = strtolower($name);
@@ -151,17 +151,8 @@ class PhpNamespace extends Object
 		if (!$res && Strings::startsWith($lower, strtolower($this->name) . '\\')) {
 			return substr($name, strlen($this->name) + 1);
 		} else {
-			return $res ?: '\\' . $name;
+			return $res ?: ($this->name ? '\\' : '') . $name;
 		}
-	}
-
-
-	/**
-	 * @return ClassType[]
-	 */
-	public function getClasses()
-	{
-		return $this->classes;
 	}
 
 
@@ -200,11 +191,20 @@ class PhpNamespace extends Object
 
 
 	/**
+	 * @return ClassType[]
+	 */
+	public function getClasses()
+	{
+		return $this->classes;
+	}
+
+
+	/**
 	 * @return string PHP code
 	 */
 	public function __toString()
 	{
-		$uses = array();
+		$uses = [];
 		asort($this->uses);
 		foreach ($this->uses as $alias => $name) {
 			$useNamespace = Helpers::extractNamespace($name);

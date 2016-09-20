@@ -1,14 +1,13 @@
 <?php
 
 /**
- * This file is part of the Nette Framework (http://nette.org)
- * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
+ * This file is part of the Nette Framework (https://nette.org)
+ * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 
 namespace Nette\Diagnostics;
 
-use Nette,
-	Tracy;
+use Tracy;
 
 
 /**
@@ -44,6 +43,7 @@ class Debugger extends Tracy\Debugger
 	 */
 	public static function enable($mode = NULL, $logDirectory = NULL, $email = NULL)
 	{
+		trigger_error(__CLASS__ . ' is deprecated, use Tracy\Debugger.', E_USER_DEPRECATED);
 		parent::enable($mode, $logDirectory, $email);
 		self::$blueScreen = self::getBlueScreen();
 		self::$bar = self::getBar();

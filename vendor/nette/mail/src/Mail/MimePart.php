@@ -1,28 +1,25 @@
 <?php
 
 /**
- * This file is part of the Nette Framework (http://nette.org)
- * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
+ * This file is part of the Nette Framework (https://nette.org)
+ * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 
 namespace Nette\Mail;
 
-use Nette,
-	Nette\Utils\Strings;
+use Nette;
+use Nette\Utils\Strings;
 
 
 /**
  * MIME message part.
  *
- * @author     David Grudl
- *
- * @property-read array $headers
- * @property-write $contentType
- * @property   string $encoding
  * @property   mixed $body
  */
-class MimePart extends Nette\Object
+class MimePart
 {
+	use Nette\SmartObject;
+
 	/** encoding */
 	const ENCODING_BASE64 = 'base64',
 		ENCODING_7BIT = '7bit',
@@ -34,10 +31,10 @@ class MimePart extends Nette\Object
 	const LINE_LENGTH = 76;
 
 	/** @var array */
-	private $headers = array();
+	private $headers = [];
 
 	/** @var array */
-	private $parts = array();
+	private $parts = [];
 
 	/** @var string */
 	private $body;
@@ -64,7 +61,7 @@ class MimePart extends Nette\Object
 		} elseif (is_array($value)) { // email
 			$tmp = & $this->headers[$name];
 			if (!$append || !is_array($tmp)) {
-				$tmp = array();
+				$tmp = [];
 			}
 
 			foreach ($value as $email => $recipient) {
@@ -259,7 +256,7 @@ class MimePart extends Nette\Object
 					// break intentionally omitted
 
 				case self::ENCODING_8BIT:
-					$body = str_replace(array("\x00", "\r"), '', $body);
+					$body = str_replace(["\x00", "\r"], '', $body);
 					$body = str_replace("\n", self::EOL, $body);
 					$output .= $body;
 					break;
@@ -308,11 +305,11 @@ class MimePart extends Nette\Object
 			$offset = 1;
 		}
 
-		$s = iconv_mime_encode(str_repeat(' ', $old = $offset), $s, array(
+		$s = iconv_mime_encode(str_repeat(' ', $old = $offset), $s, [
 			'scheme' => 'B', // Q is broken
 			'input-charset' => 'UTF-8',
 			'output-charset' => 'UTF-8',
-		));
+		]);
 
 		$offset = strlen($s) - strrpos($s, "\n");
 		$s = str_replace("\n ", "\n\t", substr($s, $old + 2)); // adds ': '

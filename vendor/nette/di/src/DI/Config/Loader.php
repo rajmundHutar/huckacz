@@ -1,33 +1,33 @@
 <?php
 
 /**
- * This file is part of the Nette Framework (http://nette.org)
- * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
+ * This file is part of the Nette Framework (https://nette.org)
+ * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 
 namespace Nette\DI\Config;
 
-use Nette,
-	Nette\Utils\Validators;
+use Nette;
+use Nette\Utils\Validators;
 
 
 /**
  * Configuration file loader.
- *
- * @author     David Grudl
  */
-class Loader extends Nette\Object
+class Loader
 {
+	use Nette\SmartObject;
+
 	/** @internal */
 	const INCLUDES_KEY = 'includes';
 
-	private $adapters = array(
-		'php' => 'Nette\DI\Config\Adapters\PhpAdapter',
-		'ini' => 'Nette\DI\Config\Adapters\IniAdapter',
-		'neon' => 'Nette\DI\Config\Adapters\NeonAdapter',
-	);
+	private $adapters = [
+		'php' => Adapters\PhpAdapter::class,
+		'ini' => Adapters\IniAdapter::class,
+		'neon' => Adapters\NeonAdapter::class,
+	];
 
-	private $dependencies = array();
+	private $dependencies = [];
 
 
 	/**
@@ -41,7 +41,7 @@ class Loader extends Nette\Object
 		if (!is_file($file) || !is_readable($file)) {
 			throw new Nette\FileNotFoundException("File '$file' is missing or is not readable.");
 		}
-		$this->dependencies[] = realpath($file);
+		$this->dependencies[] = $file;
 		$data = $this->getAdapter($file)->load($file);
 
 		if ($section) {
@@ -52,7 +52,7 @@ class Loader extends Nette\Object
 		}
 
 		// include child files
-		$merged = array();
+		$merged = [];
 		if (isset($data[self::INCLUDES_KEY])) {
 			Validators::assert($data[self::INCLUDES_KEY], 'list', "section 'includes' in file '$file'");
 			foreach ($data[self::INCLUDES_KEY] as $include) {
@@ -92,7 +92,7 @@ class Loader extends Nette\Object
 	/**
 	 * Registers adapter for given file extension.
 	 * @param  string  file extension
-	 * @param  string|Nette\DI\Config\IAdapter
+	 * @param  string|IAdapter
 	 * @return self
 	 */
 	public function addAdapter($extension, $adapter)

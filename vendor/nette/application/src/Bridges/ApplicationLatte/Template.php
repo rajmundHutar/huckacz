@@ -1,23 +1,23 @@
 <?php
 
 /**
- * This file is part of the Nette Framework (http://nette.org)
- * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
+ * This file is part of the Nette Framework (https://nette.org)
+ * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 
 namespace Nette\Bridges\ApplicationLatte;
 
-use Nette,
-	Latte;
+use Nette;
+use Latte;
 
 
 /**
  * Latte powered template.
- *
- * @author     David Grudl
  */
-class Template extends Nette\Object implements Nette\Application\UI\ITemplate
+class Template implements Nette\Application\UI\ITemplate
 {
+	use Nette\SmartObject;
+
 	/** @var Latte\Engine */
 	private $latte;
 
@@ -25,7 +25,7 @@ class Template extends Nette\Object implements Nette\Application\UI\ITemplate
 	private $file;
 
 	/** @var array */
-	private $params = array();
+	private $params = [];
 
 
 	public function __construct(Latte\Engine $latte)
@@ -47,7 +47,7 @@ class Template extends Nette\Object implements Nette\Application\UI\ITemplate
 	 * Renders template to output.
 	 * @return void
 	 */
-	public function render($file = NULL, array $params = array())
+	public function render($file = NULL, array $params = [])
 	{
 		$this->latte->render($file ?: $this->file, $params + $this->params);
 	}
@@ -60,13 +60,12 @@ class Template extends Nette\Object implements Nette\Application\UI\ITemplate
 	 */
 	public function __toString()
 	{
-		ob_start();
 		try {
-			$this->render();
-			return ob_get_clean();
-
+			return $this->latte->renderToString($this->file, $this->params);
+		} catch (\Throwable $e) {
 		} catch (\Exception $e) {
-			ob_end_clean();
+		}
+		if (isset($e)) {
 			if (func_num_args()) {
 				throw $e;
 			}
@@ -96,25 +95,8 @@ class Template extends Nette\Object implements Nette\Application\UI\ITemplate
 	 */
 	public function registerHelper($name, $callback)
 	{
-		//trigger_error(__METHOD__ . '() is deprecated, use getLatte()->addFilter().', E_USER_DEPRECATED);
+		trigger_error(__METHOD__ . '() is deprecated, use getLatte()->addFilter().', E_USER_DEPRECATED);
 		return $this->latte->addFilter($name, $callback);
-	}
-
-
-	/**
-	 * Alias for addFilterLoader()
-	 * @deprecated
-	 */
-	public function registerHelperLoader($loader)
-	{
-		trigger_error(__METHOD__ . '() is deprecated, use dynamic getLatte()->addFilter().', E_USER_DEPRECATED);
-		$latte = $this->latte;
-		$this->latte->addFilter(NULL, function($name) use ($loader, $latte) {
-			if ($callback = call_user_func($loader, $name)) {
-				$latte->addFilter($name, $callback);
-			}
-		});
-		return $this;
 	}
 
 
@@ -124,17 +106,10 @@ class Template extends Nette\Object implements Nette\Application\UI\ITemplate
 	 */
 	public function setTranslator(Nette\Localization\ITranslator $translator = NULL)
 	{
-		$this->latte->addFilter('translate', $translator === NULL ? NULL : array($translator, 'translate'));
+		$this->latte->addFilter('translate', $translator === NULL ? NULL : function (Latte\Runtime\FilterInfo $fi, ...$args) use ($translator) {
+			return $translator->translate(...$args);
+		});
 		return $this;
-	}
-
-
-	/**
-	 * @deprecated
-	 */
-	public function registerFilter($callback)
-	{
-		throw new Nette\DeprecatedException(__METHOD__ . '() is deprecated.');
 	}
 
 

@@ -1,25 +1,23 @@
 <?php
 
 /**
- * This file is part of the Nette Framework (http://nette.org)
- * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
+ * This file is part of the Nette Framework (https://nette.org)
+ * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 
 namespace Nette\Application\Routers;
 
-use Nette,
-	Nette\Application;
+use Nette;
+use Nette\Application;
 
 
 /**
  * The unidirectional router for CLI. (experimental)
- *
- * @author     David Grudl
- *
- * @property-read array $defaults
  */
-class CliRouter extends Nette\Object implements Application\IRouter
+class CliRouter implements Application\IRouter
 {
+	use Nette\SmartObject;
+
 	const PRESENTER_KEY = 'action';
 
 	/** @var array */
@@ -29,7 +27,7 @@ class CliRouter extends Nette\Object implements Application\IRouter
 	/**
 	 * @param  array   default values
 	 */
-	public function __construct($defaults = array())
+	public function __construct($defaults = [])
 	{
 		$this->defaults = $defaults;
 	}
@@ -45,7 +43,7 @@ class CliRouter extends Nette\Object implements Application\IRouter
 			return NULL;
 		}
 
-		$names = array(self::PRESENTER_KEY);
+		$names = [self::PRESENTER_KEY];
 		$params = $this->defaults;
 		$args = $_SERVER['argv'];
 		array_shift($args);
@@ -81,10 +79,10 @@ class CliRouter extends Nette\Object implements Application\IRouter
 		if (!isset($params[self::PRESENTER_KEY])) {
 			throw new Nette\InvalidStateException('Missing presenter & action in route definition.');
 		}
-		$presenter = $params[self::PRESENTER_KEY];
-		if ($a = strrpos($presenter, ':')) {
-			$params[self::PRESENTER_KEY] = substr($presenter, $a + 1);
-			$presenter = substr($presenter, 0, $a);
+		list($module, $presenter) = Nette\Application\Helpers::splitName($params[self::PRESENTER_KEY]);
+		if ($module !== '') {
+			$params[self::PRESENTER_KEY] = $presenter;
+			$presenter = $module;
 		}
 
 		return new Application\Request(

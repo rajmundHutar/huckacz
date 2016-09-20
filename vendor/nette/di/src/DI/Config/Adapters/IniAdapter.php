@@ -1,23 +1,23 @@
 <?php
 
 /**
- * This file is part of the Nette Framework (http://nette.org)
- * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
+ * This file is part of the Nette Framework (https://nette.org)
+ * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 
 namespace Nette\DI\Config\Adapters;
 
-use Nette,
-	Nette\DI\Config\Helpers;
+use Nette;
+use Nette\DI\Config\Helpers;
 
 
 /**
  * Reading and generating INI files.
- *
- * @author     David Grudl
  */
-class IniAdapter extends Nette\Object implements Nette\DI\Config\IAdapter
+class IniAdapter implements Nette\DI\Config\IAdapter
 {
+	use Nette\SmartObject;
+
 	/** @internal */
 	const INHERITING_SEPARATOR = '<', // child < parent
 		KEY_SEPARATOR = '.', // key nesting key1.key2.key3
@@ -33,19 +33,19 @@ class IniAdapter extends Nette\Object implements Nette\DI\Config\IAdapter
 	 */
 	public function load($file)
 	{
-		$ini = @parse_ini_file($file, TRUE); // intentionally @
+		$ini = @parse_ini_file($file, TRUE); // @ escalated to exception
 		if ($ini === FALSE) {
 			$error = error_get_last();
 			throw new Nette\InvalidStateException("parse_ini_file(): $error[message]");
 		}
 
-		$data = array();
+		$data = [];
 		foreach ($ini as $secName => $secData) {
 			if (is_array($secData)) { // is section?
 				if (substr($secName, -1) === self::RAW_SECTION) {
 					$secName = substr($secName, 0, -1);
 				} else { // process key nesting separator (key1.key2.key3)
-					$tmp = array();
+					$tmp = [];
 					foreach ($secData as $key => $val) {
 						$cursor = & $tmp;
 						$key = str_replace(self::ESCAPED_KEY_SEPARATOR, "\xFF", $key);
@@ -95,10 +95,10 @@ class IniAdapter extends Nette\Object implements Nette\DI\Config\IAdapter
 	 */
 	public function dump(array $data)
 	{
-		$output = array();
+		$output = [];
 		foreach ($data as $name => $secData) {
 			if (!is_array($secData)) {
-				$output = array();
+				$output = [];
 				self::build($data, $output, '');
 				break;
 			}

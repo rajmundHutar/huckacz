@@ -1,8 +1,8 @@
 <?php
 
 /**
- * This file is part of the Nette Framework (http://nette.org)
- * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
+ * This file is part of the Nette Framework (https://nette.org)
+ * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 
 namespace Nette\Database;
@@ -12,11 +12,11 @@ use Nette;
 
 /**
  * SQL preprocessor.
- *
- * @author     David Grudl
  */
-class SqlPreprocessor extends Nette\Object
+class SqlPreprocessor
 {
+	use Nette\SmartObject;
+
 	/** @var Connection */
 	private $connection;
 
@@ -50,10 +50,11 @@ class SqlPreprocessor extends Nette\Object
 	public function process($params)
 	{
 		$this->params = $params;
-		$this->counter = 0; $prev = -1;
-		$this->remaining = array();
+		$this->counter = 0;
+		$prev = -1;
+		$this->remaining = [];
 		$this->arrayMode = NULL;
-		$res = array();
+		$res = [];
 
 		while ($this->counter < count($params)) {
 			$param = $params[$this->counter++];
@@ -67,15 +68,15 @@ class SqlPreprocessor extends Nette\Object
 				$this->arrayMode = NULL;
 				$res[] = Nette\Utils\Strings::replace(
 					$param,
-					'~\'[^\']*+\'|"[^"]*+"|\?[a-z]*|^\s*+(?:INSERT|REPLACE)\b|\b(?:SET|WHERE|HAVING|ORDER BY|GROUP BY|KEY UPDATE)(?=[\s?]*+\z)|/\*.*?\*/|--[^\n]*~si',
-					array($this, 'callback')
+					'~\'[^\']*+\'|"[^"]*+"|\?[a-z]*|^\s*+(?:INSERT|REPLACE)\b|\b(?:SET|WHERE|HAVING|ORDER BY|GROUP BY|KEY UPDATE)(?=\s*\z|\s*\?)|/\*.*?\*/|--[^\n]*~si',
+					[$this, 'callback']
 				);
 			} else {
 				throw new Nette\InvalidArgumentException('There are more parameters than placeholders.');
 			}
 		}
 
-		return array(implode(' ', $res), $this->remaining);
+		return [implode(' ', $res), $this->remaining];
 	}
 
 
@@ -93,7 +94,7 @@ class SqlPreprocessor extends Nette\Object
 			return $m;
 
 		} else { // command
-			static $modes = array(
+			static $modes = [
 				'INSERT' => 'values',
 				'REPLACE' => 'values',
 				'KEY UPDATE' => 'set',
@@ -102,7 +103,7 @@ class SqlPreprocessor extends Nette\Object
 				'HAVING' => 'and',
 				'ORDER BY' => 'order',
 				'GROUP BY' => 'order',
-			);
+			];
 			$this->arrayMode = $modes[ltrim(strtoupper($m))];
 			return $m;
 		}
@@ -136,14 +137,17 @@ class SqlPreprocessor extends Nette\Object
 			} elseif ($value instanceof Table\IRow) {
 				return $value->getPrimary();
 
-			} elseif ($value instanceof \DateTime || $value instanceof \DateTimeInterface) {
-				return $this->driver->formatDateTime($value);
-
 			} elseif ($value instanceof SqlLiteral) {
 				$prep = clone $this;
-				list($res, $params) = $prep->process(array_merge(array($value->__toString()), $value->getParameters()));
+				list($res, $params) = $prep->process(array_merge([$value->__toString()], $value->getParameters()));
 				$this->remaining = array_merge($this->remaining, $params);
 				return $res;
+
+			} elseif ($value instanceof \DateTimeInterface) {
+				return $this->driver->formatDateTime($value);
+
+			} elseif ($value instanceof \DateInterval) {
+				return $this->driver->formatDateInterval($value);
 
 			} elseif (is_object($value) && method_exists($value, '__toString')) {
 				return $this->formatValue((string) $value);
@@ -166,7 +170,7 @@ class SqlPreprocessor extends Nette\Object
 		}
 
 		if (is_array($value)) {
-			$vx = $kx = array();
+			$vx = $kx = [];
 			if ($mode === 'auto') {
 				$mode = $this->arrayMode;
 			}
@@ -177,8 +181,8 @@ class SqlPreprocessor extends Nette\Object
 						$kx[] = $this->delimite($k);
 					}
 					foreach ($value as $val) {
-						$vx2 = array();
-							foreach ($val as $v) {
+						$vx2 = [];
+						foreach ($val as $v) {
 							$vx2[] = $this->formatValue($v);
 						}
 						$vx[] = implode(', ', $vx2);
@@ -205,7 +209,7 @@ class SqlPreprocessor extends Nette\Object
 						$vx[] = $this->delimite($k) . '=' . $this->formatValue($v);
 					}
 				}
-				return $vx ? implode(', ', $vx) : '1=1';
+				return implode(', ', $vx);
 
 			} elseif ($mode === 'and' || $mode === 'or') { // (key [operator] value) AND ...
 				foreach ($value as $k => $v) {
@@ -239,7 +243,7 @@ class SqlPreprocessor extends Nette\Object
 				throw new Nette\InvalidArgumentException("Unknown placeholder ?$mode.");
 			}
 
-		} elseif (in_array($mode, array('and', 'or', 'set', 'values', 'order'), TRUE)) {
+		} elseif (in_array($mode, ['and', 'or', 'set', 'values', 'order'], TRUE)) {
 			$type = gettype($value);
 			throw new Nette\InvalidArgumentException("Placeholder ?$mode expects array or Traversable object, $type given.");
 
@@ -254,7 +258,7 @@ class SqlPreprocessor extends Nette\Object
 
 	private function delimite($name)
 	{
-		return implode('.', array_map(array($this->driver, 'delimite'), explode('.', $name)));
+		return implode('.', array_map([$this->driver, 'delimite'], explode('.', $name)));
 	}
 
 }

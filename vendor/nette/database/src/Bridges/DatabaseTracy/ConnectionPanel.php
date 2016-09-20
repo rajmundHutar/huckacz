@@ -1,24 +1,24 @@
 <?php
 
 /**
- * This file is part of the Nette Framework (http://nette.org)
- * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
+ * This file is part of the Nette Framework (https://nette.org)
+ * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 
 namespace Nette\Bridges\DatabaseTracy;
 
-use Nette,
-	Nette\Database\Helpers,
-	Tracy;
+use Nette;
+use Nette\Database\Helpers;
+use Tracy;
 
 
 /**
  * Debug panel for Nette\Database.
- *
- * @author     David Grudl
  */
-class ConnectionPanel extends Nette\Object implements Tracy\IBarPanel
+class ConnectionPanel implements Tracy\IBarPanel
 {
+	use Nette\SmartObject;
+
 	/** @var int */
 	public $maxQueries = 100;
 
@@ -29,7 +29,7 @@ class ConnectionPanel extends Nette\Object implements Tracy\IBarPanel
 	private $count = 0;
 
 	/** @var array */
-	private $queries = array();
+	private $queries = [];
 
 	/** @var string */
 	public $name;
@@ -43,7 +43,7 @@ class ConnectionPanel extends Nette\Object implements Tracy\IBarPanel
 
 	public function __construct(Nette\Database\Connection $connection)
 	{
-		$connection->onQuery[] = array($this, 'logQuery');
+		$connection->onQuery[] = [$this, 'logQuery'];
 	}
 
 
@@ -55,7 +55,7 @@ class ConnectionPanel extends Nette\Object implements Tracy\IBarPanel
 		$this->count++;
 
 		$source = NULL;
-		$trace = $result instanceof \PDOException ? $result->getTrace() : debug_backtrace(PHP_VERSION_ID >= 50306 ? DEBUG_BACKTRACE_IGNORE_ARGS : FALSE);
+		$trace = $result instanceof \PDOException ? $result->getTrace() : debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
 		foreach ($trace as $row) {
 			if (isset($row['file']) && is_file($row['file']) && !Tracy\Debugger::getBluescreen()->isCollapsed($row['file'])) {
 				if ((isset($row['function']) && strpos($row['function'], 'call_user_func') === 0)
@@ -63,18 +63,18 @@ class ConnectionPanel extends Nette\Object implements Tracy\IBarPanel
 				) {
 					continue;
 				}
-				$source = array($row['file'], (int) $row['line']);
+				$source = [$row['file'], (int) $row['line']];
 				break;
 			}
 		}
 		if ($result instanceof Nette\Database\ResultSet) {
 			$this->totalTime += $result->getTime();
 			if ($this->count < $this->maxQueries) {
-				$this->queries[] = array($connection, $result->getQueryString(), $result->getParameters(), $source, $result->getTime(), $result->getRowCount(), NULL);
+				$this->queries[] = [$connection, $result->getQueryString(), $result->getParameters(), $source, $result->getTime(), $result->getRowCount(), NULL];
 			}
 
 		} elseif ($result instanceof \PDOException && $this->count < $this->maxQueries) {
-			$this->queries[] = array($connection, $result->queryString, NULL, $source, NULL, NULL, $result->getMessage());
+			$this->queries[] = [$connection, $result->queryString, NULL, $source, NULL, NULL, $result->getMessage()];
 		}
 	}
 
@@ -90,10 +90,10 @@ class ConnectionPanel extends Nette\Object implements Tracy\IBarPanel
 		} elseif ($item = Tracy\Helpers::findTrace($e->getTrace(), 'PDO::prepare')) {
 			$sql = $item['args'][0];
 		}
-		return isset($sql) ? array(
+		return isset($sql) ? [
 			'tab' => 'SQL',
 			'panel' => Helpers::dumpSql($sql),
-		) : NULL;
+		] : NULL;
 	}
 
 
@@ -102,7 +102,7 @@ class ConnectionPanel extends Nette\Object implements Tracy\IBarPanel
 		$name = $this->name;
 		$count = $this->count;
 		$totalTime = $this->totalTime;
-		ob_start();
+		ob_start(function () {});
 		require __DIR__ . '/templates/ConnectionPanel.tab.phtml';
 		return ob_get_clean();
 	}
@@ -118,7 +118,7 @@ class ConnectionPanel extends Nette\Object implements Tracy\IBarPanel
 		$name = $this->name;
 		$count = $this->count;
 		$totalTime = $this->totalTime;
-		$queries = array();
+		$queries = [];
 		foreach ($this->queries as $query) {
 			list($connection, $sql, $params, $source, $time, $rows, $error) = $query;
 			$explain = NULL;
@@ -126,13 +126,14 @@ class ConnectionPanel extends Nette\Object implements Tracy\IBarPanel
 				try {
 					$cmd = is_string($this->explain) ? $this->explain : 'EXPLAIN';
 					$explain = $connection->queryArgs("$cmd $sql", $params)->fetchAll();
-				} catch (\PDOException $e) {}
+				} catch (\PDOException $e) {
+				}
 			}
 			$query[] = $explain;
 			$queries[] = $query;
 		}
 
-		ob_start();
+		ob_start(function () {});
 		require __DIR__ . '/templates/ConnectionPanel.panel.phtml';
 		return ob_get_clean();
 	}

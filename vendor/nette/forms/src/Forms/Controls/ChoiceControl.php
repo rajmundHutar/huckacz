@@ -1,8 +1,8 @@
 <?php
 
 /**
- * This file is part of the Nette Framework (http://nette.org)
- * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
+ * This file is part of the Nette Framework (https://nette.org)
+ * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 
 namespace Nette\Forms\Controls;
@@ -13,16 +13,16 @@ use Nette;
 /**
  * Choice control that allows single item selection.
  *
- * @author     David Grudl
- *
  * @property   array $items
  * @property-read mixed $selectedItem
- * @property-read mixed $rawValue
  */
 abstract class ChoiceControl extends BaseControl
 {
+	/** @var bool */
+	public $checkAllowedValues = TRUE;
+
 	/** @var array */
-	private $items = array();
+	private $items = [];
 
 
 	public function __construct($label = NULL, array $items = NULL)
@@ -45,7 +45,7 @@ abstract class ChoiceControl extends BaseControl
 			if (is_array($this->disabled) && isset($this->disabled[$this->value])) {
 				$this->value = NULL;
 			} else {
-				$this->value = key(array($this->value => NULL));
+				$this->value = key([$this->value => NULL]);
 			}
 		}
 	}
@@ -53,23 +53,24 @@ abstract class ChoiceControl extends BaseControl
 
 	/**
 	 * Sets selected item (by key).
-	 * @param  scalar
+	 * @param  string|int
 	 * @return self
+	 * @internal
 	 */
 	public function setValue($value)
 	{
-		if ($value !== NULL && !array_key_exists((string) $value, $this->items)) {
-			$range = Nette\Utils\Strings::truncate(implode(', ', array_map(function($s) { return var_export($s, TRUE); }, array_keys($this->items))), 70, '...');
-			throw new Nette\InvalidArgumentException("Value '$value' is out of allowed range [$range] in field '{$this->name}'.");
+		if ($this->checkAllowedValues && $value !== NULL && !array_key_exists((string) $value, $this->items)) {
+			$set = Nette\Utils\Strings::truncate(implode(', ', array_map(function ($s) { return var_export($s, TRUE); }, array_keys($this->items))), 70, '...');
+			throw new Nette\InvalidArgumentException("Value '$value' is out of allowed set [$set] in field '{$this->name}'.");
 		}
-		$this->value = $value === NULL ? NULL : key(array((string) $value => NULL));
+		$this->value = $value === NULL ? NULL : key([(string) $value => NULL]);
 		return $this;
 	}
 
 
 	/**
 	 * Returns selected key.
-	 * @return scalar
+	 * @return string|int
 	 */
 	public function getValue()
 	{
@@ -79,7 +80,7 @@ abstract class ChoiceControl extends BaseControl
 
 	/**
 	 * Returns selected key (not checked).
-	 * @return scalar
+	 * @return string|int
 	 */
 	public function getRawValue()
 	{

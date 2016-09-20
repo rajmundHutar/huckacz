@@ -1,8 +1,8 @@
 <?php
 
 /**
- * This file is part of the Nette Framework (http://nette.org)
- * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
+ * This file is part of the Nette Framework (https://nette.org)
+ * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 
 namespace Nette\Forms\Controls;
@@ -12,8 +12,6 @@ use Nette;
 
 /**
  * Hidden form control used to store a non-displayed value.
- *
- * @author     David Grudl
  */
 class HiddenField extends BaseControl
 {
@@ -25,8 +23,9 @@ class HiddenField extends BaseControl
 	{
 		parent::__construct();
 		$this->control->type = 'hidden';
+		$this->setOption('type', 'hidden');
 		if ($persistentValue !== NULL) {
-			$this->unmonitor('Nette\Forms\Form');
+			$this->unmonitor(Nette\Forms\Form::class);
 			$this->persistValue = TRUE;
 			$this->value = (string) $persistentValue;
 		}
@@ -37,6 +36,7 @@ class HiddenField extends BaseControl
 	 * Sets control's value.
 	 * @param  string
 	 * @return self
+	 * @internal
 	 */
 	public function setValue($value)
 	{
@@ -58,11 +58,11 @@ class HiddenField extends BaseControl
 	{
 		$this->setOption('rendered', TRUE);
 		$el = clone $this->control;
-		return $el->addAttributes(array(
+		return $el->addAttributes([
 			'name' => $this->getHtmlName(),
 			'disabled' => $this->isDisabled(),
 			'value' => $this->value,
-		));
+		]);
 	}
 
 

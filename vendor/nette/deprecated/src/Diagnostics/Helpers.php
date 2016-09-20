@@ -1,14 +1,14 @@
 <?php
 
 /**
- * This file is part of the Nette Framework (http://nette.org)
- * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
+ * This file is part of the Nette Framework (https://nette.org)
+ * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 
 namespace Nette\Diagnostics;
 
-use Nette,
-	Tracy;
+use Nette;
+use Tracy;
 
 
 /**
@@ -21,8 +21,9 @@ class Helpers extends Tracy\Helpers
 	 * Returns link to editor.
 	 * @return Nette\Utils\Html
 	 */
-	public static function editorLink($file, $line)
+	public static function editorLink($file, $line = NULL)
 	{
+		trigger_error(__METHOD__ . '() is deprecated; use Tracy\Helpers::editorLink() instead.', E_USER_DEPRECATED);
 		if (Debugger::$editor && is_file($file)) {
 			$dir = dirname(strtr($file, '/', DIRECTORY_SEPARATOR));
 			$base = isset($_SERVER['SCRIPT_FILENAME']) ? dirname(dirname(strtr($_SERVER['SCRIPT_FILENAME'], '/', DIRECTORY_SEPARATOR))) : dirname($dir);

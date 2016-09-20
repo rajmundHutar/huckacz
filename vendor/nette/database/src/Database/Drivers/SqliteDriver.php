@@ -1,8 +1,8 @@
 <?php
 
 /**
- * This file is part of the Nette Framework (http://nette.org)
- * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
+ * This file is part of the Nette Framework (https://nette.org)
+ * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 
 namespace Nette\Database\Drivers;
@@ -12,11 +12,11 @@ use Nette;
 
 /**
  * Supplemental SQLite3 database driver.
- *
- * @author     David Grudl
  */
-class SqliteDriver extends Nette\Object implements Nette\Database\ISupplementalDriver
+class SqliteDriver implements Nette\Database\ISupplementalDriver
 {
+	use Nette\SmartObject;
+
 	/** @var Nette\Database\Connection */
 	private $connection;
 
@@ -91,6 +91,15 @@ class SqliteDriver extends Nette\Object implements Nette\Database\ISupplementalD
 
 
 	/**
+	 * Formats date-time interval for use in a SQL statement.
+	 */
+	public function formatDateInterval(\DateInterval $value)
+	{
+		throw new Nette\NotSupportedException;
+	}
+
+
+	/**
 	 * Encodes string for use in a LIKE statement.
 	 */
 	public function formatLike($value, $pos)
@@ -105,8 +114,12 @@ class SqliteDriver extends Nette\Object implements Nette\Database\ISupplementalD
 	 */
 	public function applyLimit(& $sql, $limit, $offset)
 	{
-		if ($limit >= 0 || $offset > 0) {
-			$sql .= ' LIMIT ' . (int) $limit . ($offset > 0 ? ' OFFSET ' . (int) $offset : '');
+		if ($limit < 0 || $offset < 0) {
+			throw new Nette\InvalidArgumentException('Negative offset or limit.');
+
+		} elseif ($limit !== NULL || $offset) {
+			$sql .= ' LIMIT ' . ($limit === NULL ? '-1' : (int) $limit)
+				. ($offset ? ' OFFSET ' . (int) $offset : '');
 		}
 	}
 
@@ -135,17 +148,17 @@ class SqliteDriver extends Nette\Object implements Nette\Database\ISupplementalD
 	 */
 	public function getTables()
 	{
-		$tables = array();
+		$tables = [];
 		foreach ($this->connection->query("
 			SELECT name, type = 'view' as view FROM sqlite_master WHERE type IN ('table', 'view') AND name NOT LIKE 'sqlite_%'
 			UNION ALL
 			SELECT name, type = 'view' as view FROM sqlite_temp_master WHERE type IN ('table', 'view') AND name NOT LIKE 'sqlite_%'
 			ORDER BY name
 		") as $row) {
-			$tables[] = array(
+			$tables[] = [
 				'name' => $row->name,
 				'view' => (bool) $row->view,
-			);
+			];
 		}
 
 		return $tables;
@@ -163,12 +176,12 @@ class SqliteDriver extends Nette\Object implements Nette\Database\ISupplementalD
 			SELECT sql FROM sqlite_temp_master WHERE type = 'table' AND name = {$this->connection->quote($table)}
 		")->fetch();
 
-		$columns = array();
+		$columns = [];
 		foreach ($this->connection->query("PRAGMA table_info({$this->delimite($table)})") as $row) {
 			$column = $row['name'];
 			$pattern = "/(\"$column\"|\[$column\]|$column)\\s+[^,]+\\s+PRIMARY\\s+KEY\\s+AUTOINCREMENT/Ui";
 			$type = explode('(', $row['type']);
-			$columns[] = array(
+			$columns[] = [
 				'name' => $column,
 				'table' => $table,
 				'nativetype' => strtoupper($type[0]),
@@ -179,7 +192,7 @@ class SqliteDriver extends Nette\Object implements Nette\Database\ISupplementalD
 				'autoincrement' => (bool) preg_match($pattern, $meta['sql']),
 				'primary' => $row['pk'] > 0,
 				'vendor' => (array) $row,
-			);
+			];
 		}
 		return $columns;
 	}
@@ -190,7 +203,7 @@ class SqliteDriver extends Nette\Object implements Nette\Database\ISupplementalD
 	 */
 	public function getIndexes($table)
 	{
-		$indexes = array();
+		$indexes = [];
 		foreach ($this->connection->query("PRAGMA index_list({$this->delimite($table)})") as $row) {
 			$indexes[$row['name']]['name'] = $row['name'];
 			$indexes[$row['name']]['unique'] = (bool) $row['unique'];
@@ -217,12 +230,12 @@ class SqliteDriver extends Nette\Object implements Nette\Database\ISupplementalD
 		if (!$indexes) { // @see http://www.sqlite.org/lang_createtable.html#rowid
 			foreach ($columns as $column) {
 				if ($column['vendor']['pk']) {
-					$indexes[] = array(
+					$indexes[] = [
 						'name' => 'ROWID',
 						'unique' => TRUE,
 						'primary' => TRUE,
-						'columns' => array($column['name']),
-					);
+						'columns' => [$column['name']],
+					];
 					break;
 				}
 			}
@@ -237,7 +250,7 @@ class SqliteDriver extends Nette\Object implements Nette\Database\ISupplementalD
 	 */
 	public function getForeignKeys($table)
 	{
-		$keys = array();
+		$keys = [];
 		foreach ($this->connection->query("PRAGMA foreign_key_list({$this->delimite($table)})") as $row) {
 			$keys[$row['id']]['name'] = $row['id']; // foreign key name
 			$keys[$row['id']]['local'] = $row['from']; // local columns
@@ -259,7 +272,7 @@ class SqliteDriver extends Nette\Object implements Nette\Database\ISupplementalD
 	 */
 	public function getColumnTypes(\PDOStatement $statement)
 	{
-		$types = array();
+		$types = [];
 		$count = $statement->columnCount();
 		for ($col = 0; $col < $count; $col++) {
 			$meta = $statement->getColumnMeta($col);

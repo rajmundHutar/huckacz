@@ -1,8 +1,8 @@
 <?php
 
 /**
- * This file is part of the Nette Framework (http://nette.org)
- * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
+ * This file is part of the Nette Framework (https://nette.org)
+ * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 
 namespace Nette\Forms;
@@ -13,19 +13,12 @@ use Nette;
 /**
  * Creates, validates and renders HTML forms.
  *
- * @author     David Grudl
- *
- * @property   mixed $action
- * @property   string $method
- * @property-read array $groups
- * @property   Nette\Localization\ITranslator|NULL $translator
- * @property-read bool $anchored
- * @property-read ISubmitterControl|FALSE $submitted
- * @property-read bool $success
- * @property-read array $httpData
  * @property-read array $errors
+ * @property-read array $ownErrors
  * @property-read Nette\Utils\Html $elementPrototype
- * @property   IFormRenderer $renderer
+ * @property-read IFormRenderer $renderer
+ * @property string $action
+ * @property string $method
  */
 class Form extends Container implements Nette\Utils\IHtmlString
 {
@@ -33,6 +26,7 @@ class Form extends Container implements Nette\Utils\IHtmlString
 	const EQUAL = ':equal',
 		IS_IN = self::EQUAL,
 		NOT_EQUAL = ':notEqual',
+		IS_NOT_IN = self::NOT_EQUAL,
 		FILLED = ':filled',
 		BLANK = ':blank',
 		REQUIRED = self::FILLED,
@@ -83,14 +77,17 @@ class Form extends Container implements Nette\Utils\IHtmlString
 	/** @internal protection token ID */
 	const PROTECTOR_ID = '_token_';
 
-	/** @var callable[]  function(Form $sender); Occurs when the form is submitted and successfully validated */
+	/** @var callable[]  function (Form $sender); Occurs when the form is submitted and successfully validated */
 	public $onSuccess;
 
-	/** @var callable[]  function(Form $sender); Occurs when the form is submitted and is not valid */
+	/** @var callable[]  function (Form $sender); Occurs when the form is submitted and is not valid */
 	public $onError;
 
-	/** @var callable[]  function(Form $sender); Occurs when the form is submitted */
+	/** @var callable[]  function (Form $sender); Occurs when the form is submitted */
 	public $onSubmit;
+
+	/** @var callable[]  function (Form $sender); Occurs before the form is rendered */
+	public $onRender;
 
 	/** @var mixed or NULL meaning: not detected yet */
 	private $submittedBy;
@@ -108,13 +105,16 @@ class Form extends Container implements Nette\Utils\IHtmlString
 	private $translator;
 
 	/** @var ControlGroup[] */
-	private $groups = array();
+	private $groups = [];
 
 	/** @var array */
-	private $errors = array();
+	private $errors = [];
 
 	/** @var Nette\Http\IRequest  used only by standalone form */
 	public $httpRequest;
+
+	/** @var bool */
+	private $beforeRenderCalled;
 
 
 	/**
@@ -123,13 +123,14 @@ class Form extends Container implements Nette\Utils\IHtmlString
 	 */
 	public function __construct($name = NULL)
 	{
+		parent::__construct();
 		if ($name !== NULL) {
 			$this->getElementPrototype()->id = 'frm-' . $name;
 			$tracker = new Controls\HiddenField($name);
 			$tracker->setOmitted();
 			$this[self::TRACKER_ID] = $tracker;
+			$this->setParent(NULL, $name);
 		}
-		parent::__construct(NULL, $name);
 	}
 
 
@@ -159,7 +160,7 @@ class Form extends Container implements Nette\Utils\IHtmlString
 
 	/**
 	 * Returns self.
-	 * @return Form
+	 * @return self
 	 */
 	public function getForm($need = TRUE)
 	{
@@ -215,13 +216,26 @@ class Form extends Container implements Nette\Utils\IHtmlString
 
 
 	/**
+	 * Checks if the request method is the given one.
+	 * @param  string
+	 * @return bool
+	 */
+	public function isMethod($method)
+	{
+		return strcasecmp($this->getElementPrototype()->method, $method) === 0;
+	}
+
+
+	/**
 	 * Cross-Site Request Forgery (CSRF) form protection.
 	 * @param  string
 	 * @return Controls\CsrfProtection
 	 */
 	public function addProtection($message = NULL)
 	{
-		return $this[self::PROTECTOR_ID] = new Controls\CsrfProtection($message);
+		$control = new Controls\CsrfProtection($message);
+		$this->addComponent($control, self::PROTECTOR_ID, key($this->getComponents()));
+		return $control;
 	}
 
 
@@ -359,6 +373,7 @@ class Form extends Container implements Nette\Utils\IHtmlString
 	/**
 	 * Sets the submittor control.
 	 * @return self
+	 * @internal
 	 */
 	public function setSubmittedBy(ISubmitterControl $by = NULL)
 	{
@@ -409,19 +424,24 @@ class Form extends Container implements Nette\Utils\IHtmlString
 			}
 		}
 
-		if ($this->onSuccess) {
+		if (!$this->isValid()) {
+			$this->onError($this);
+
+		} elseif ($this->onSuccess !== NULL) {
+			if (!is_array($this->onSuccess) && !$this->onSuccess instanceof \Traversable) {
+				throw new Nette\UnexpectedValueException('Property Form::$onSuccess must be array or Traversable, ' . gettype($this->onSuccess) . ' given.');
+			}
 			foreach ($this->onSuccess as $handler) {
+				$params = Nette\Utils\Callback::toReflection($handler)->getParameters();
+				$values = isset($params[1]) ? $this->getValues($params[1]->isArray()) : NULL;
+				Nette\Utils\Callback::invoke($handler, $this, $values);
 				if (!$this->isValid()) {
 					$this->onError($this);
 					break;
 				}
-				$params = Nette\Utils\Callback::toReflection($handler)->getParameters();
-				$values = isset($params[1]) ? $this->getValues($params[1]->isArray()) : NULL;
-				Nette\Utils\Callback::invoke($handler, $this, $values);
 			}
-		} elseif (!$this->isValid()) {
-			$this->onError($this);
 		}
+
 		$this->onSubmit($this);
 	}
 
@@ -473,11 +493,11 @@ class Form extends Container implements Nette\Utils\IHtmlString
 	/** @internal */
 	public function validateMaxPostSize()
 	{
-		if (!$this->submittedBy || strcasecmp($this->getMethod(), 'POST') || empty($_SERVER['CONTENT_LENGTH'])) {
+		if (!$this->submittedBy || !$this->isMethod('post') || empty($_SERVER['CONTENT_LENGTH'])) {
 			return;
 		}
 		$maxSize = ini_get('post_max_size');
-		$units = array('k' => 10, 'm' => 20, 'g' => 30);
+		$units = ['k' => 10, 'm' => 20, 'g' => 30];
 		if (isset($units[$ch = strtolower(substr($maxSize, -1))])) {
 			$maxSize <<= $units[$ch];
 		}
@@ -522,7 +542,7 @@ class Form extends Container implements Nette\Utils\IHtmlString
 	 */
 	public function cleanErrors()
 	{
-		$this->errors = array();
+		$this->errors = [];
 	}
 
 
@@ -579,14 +599,38 @@ class Form extends Container implements Nette\Utils\IHtmlString
 
 
 	/**
+	 * @return void
+	 */
+	protected function beforeRender()
+	{
+	}
+
+
+	/**
+	 * Must be called before form is rendered and render() is not used.
+	 * @return void
+	 */
+	public function fireRenderEvents()
+	{
+		if (!$this->beforeRenderCalled) {
+			foreach ($this->getComponents(TRUE, Controls\BaseControl::class) as $control) {
+				$control->getRules()->check();
+			}
+			$this->beforeRenderCalled = TRUE;
+			$this->beforeRender();
+			$this->onRender($this);
+		}
+	}
+
+
+	/**
 	 * Renders form.
 	 * @return void
 	 */
-	public function render()
+	public function render(...$args)
 	{
-		$args = func_get_args();
-		array_unshift($args, $this);
-		echo call_user_func_array(array($this->getRenderer(), 'render'), $args);
+		$this->fireRenderEvents();
+		echo $this->getRenderer()->render($this, ...$args);
 	}
 
 
@@ -598,9 +642,13 @@ class Form extends Container implements Nette\Utils\IHtmlString
 	public function __toString()
 	{
 		try {
+			$this->fireRenderEvents();
 			return $this->getRenderer()->render($this);
 
+		} catch (\Throwable $e) {
 		} catch (\Exception $e) {
+		}
+		if (isset($e)) {
 			if (func_num_args()) {
 				throw $e;
 			}
@@ -630,8 +678,8 @@ class Form extends Container implements Nette\Utils\IHtmlString
 	 */
 	public function getToggles()
 	{
-		$toggles = array();
-		foreach ($this->getControls() as $control) {
+		$toggles = [];
+		foreach ($this->getComponents(TRUE, Controls\BaseControl::class) as $control) {
 			$toggles = $control->getRules()->getToggleStates($toggles);
 		}
 		return $toggles;

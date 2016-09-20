@@ -1,8 +1,8 @@
 <?php
 
 /**
- * This file is part of the Nette Framework (http://nette.org)
- * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
+ * This file is part of the Nette Framework (https://nette.org)
+ * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 
 namespace Nette\PhpGenerator;
@@ -12,13 +12,13 @@ use Nette;
 
 /**
  * Class property description.
- *
- * @author     David Grudl
  */
-class Property extends Nette\Object
+class Property
 {
+	use Nette\SmartObject;
+
 	/** @var string */
-	private $name;
+	private $name = '';
 
 	/** @var mixed */
 	public $value;
@@ -29,8 +29,8 @@ class Property extends Nette\Object
 	/** @var string  public|protected|private */
 	private $visibility = 'public';
 
-	/** @var array of string */
-	private $documents = array();
+	/** @var string|NULL */
+	private $comment;
 
 
 	/**
@@ -38,21 +38,26 @@ class Property extends Nette\Object
 	 */
 	public static function from(\ReflectionProperty $from)
 	{
-		$prop = new static;
-		$prop->name = $from->getName();
+		$prop = new static($from->getName());
 		$defaults = $from->getDeclaringClass()->getDefaultProperties();
 		$prop->value = isset($defaults[$prop->name]) ? $defaults[$prop->name] : NULL;
 		$prop->static = $from->isStatic();
 		$prop->visibility = $from->isPrivate() ? 'private' : ($from->isProtected() ? 'protected' : 'public');
-		$prop->documents = preg_replace('#^\s*\* ?#m', '', trim($from->getDocComment(), "/* \r\n\t"));
+		$prop->comment = $from->getDocComment() ? preg_replace('#^\s*\* ?#m', '', trim($from->getDocComment(), "/* \r\n\t")) : NULL;
 		return $prop;
 	}
 
 
 	/**
 	 * @param  string  without $
-	 * @return self
 	 */
+	public function __construct($name = '')
+	{
+		$this->setName($name);
+	}
+
+
+	/** @deprecated */
 	public function setName($name)
 	{
 		$this->name = (string) $name;
@@ -114,7 +119,7 @@ class Property extends Nette\Object
 	 */
 	public function setVisibility($val)
 	{
-		if (!in_array($val, array('public', 'protected', 'private'), TRUE)) {
+		if (!in_array($val, ['public', 'protected', 'private'], TRUE)) {
 			throw new Nette\InvalidArgumentException('Argument must be public|protected|private.');
 		}
 		$this->visibility = (string) $val;
@@ -132,22 +137,22 @@ class Property extends Nette\Object
 
 
 	/**
-	 * @param  string[]
+	 * @param  string|NULL
 	 * @return self
 	 */
-	public function setDocuments(array $s)
+	public function setComment($val)
 	{
-		$this->documents = $s;
+		$this->comment = $val ? (string) $val : NULL;
 		return $this;
 	}
 
 
 	/**
-	 * @return string[]
+	 * @return string|NULL
 	 */
-	public function getDocuments()
+	public function getComment()
 	{
-		return $this->documents;
+		return $this->comment;
 	}
 
 
@@ -155,10 +160,34 @@ class Property extends Nette\Object
 	 * @param  string
 	 * @return self
 	 */
+	public function addComment($val)
+	{
+		$this->comment .= $this->comment ? "\n$val" : $val;
+		return $this;
+	}
+
+
+	/** @deprecated */
+	public function setDocuments(array $s)
+	{
+		trigger_error(__METHOD__ . '() is deprecated, use similar setComment()', E_USER_DEPRECATED);
+		return $this->setComment(implode("\n", $s));
+	}
+
+
+	/** @deprecated */
+	public function getDocuments()
+	{
+		trigger_error(__METHOD__ . '() is deprecated, use similar getComment()', E_USER_DEPRECATED);
+		return $this->comment ? [$this->comment] : [];
+	}
+
+
+	/** @deprecated */
 	public function addDocument($s)
 	{
-		$this->documents[] = (string) $s;
-		return $this;
+		trigger_error(__METHOD__ . '() is deprecated, use addComment()', E_USER_DEPRECATED);
+		return $this->addComment($s);
 	}
 
 }

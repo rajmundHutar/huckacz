@@ -1,35 +1,29 @@
 <?php
 
 /**
- * This file is part of the Nette Framework (http://nette.org)
- *
- * Copyright (c) 2004 David Grudl (http://davidgrudl.com)
- *
- * For the full copyright and license information, please view
- * the file license.txt that was distributed with this source code.
+ * This file is part of the Nette Framework (https://nette.org)
+ * Copyright (c) 2004 David Grudl (https://davidgrudl.com)
  */
 
 namespace Nette\Bridges\ApplicationLatte;
 
-use Nette,
-	Nette\Application\UI;
+use Nette;
+use Nette\Application\UI;
+use Latte;
 
 
 /**
  * Latte powered template factory.
- *
- * @author     David Grudl
  */
-class TemplateFactory extends Nette\Object implements UI\ITemplateFactory
+class TemplateFactory implements UI\ITemplateFactory
 {
-	/** @var Nette\Bridges\ApplicationLatte\ILatteFactory */
+	use Nette\SmartObject;
+
+	/** @var ILatteFactory */
 	private $latteFactory;
 
 	/** @var Nette\Http\IRequest */
 	private $httpRequest;
-
-	/** @var Nette\Http\IResponse */
-	private $httpResponse;
 
 	/** @var Nette\Security\User */
 	private $user;
@@ -39,11 +33,10 @@ class TemplateFactory extends Nette\Object implements UI\ITemplateFactory
 
 
 	public function __construct(ILatteFactory $latteFactory, Nette\Http\IRequest $httpRequest = NULL,
-		Nette\Http\IResponse $httpResponse = NULL, Nette\Security\User $user = NULL, Nette\Caching\IStorage $cacheStorage = NULL)
+		Nette\Security\User $user = NULL, Nette\Caching\IStorage $cacheStorage = NULL)
 	{
 		$this->latteFactory = $latteFactory;
 		$this->httpRequest = $httpRequest;
-		$this->httpResponse = $httpResponse;
 		$this->user = $user;
 		$this->cacheStorage = $cacheStorage;
 	}
@@ -66,11 +59,10 @@ class TemplateFactory extends Nette\Object implements UI\ITemplateFactory
 			$latte->onCompile = iterator_to_array($latte->onCompile);
 		}
 
-		array_unshift($latte->onCompile, function($latte) use ($control, $template) {
-			$latte->getParser()->shortNoEscape = TRUE;
+		array_unshift($latte->onCompile, function ($latte) use ($control, $template) {
 			$latte->getCompiler()->addMacro('cache', new Nette\Bridges\CacheLatte\CacheMacro($latte->getCompiler()));
 			UIMacros::install($latte->getCompiler());
-			if (class_exists('Nette\Bridges\FormsLatte\FormMacros')) {
+			if (class_exists(Nette\Bridges\FormsLatte\FormMacros::class)) {
 				Nette\Bridges\FormsLatte\FormMacros::install($latte->getCompiler());
 			}
 			if ($control) {
@@ -79,26 +71,38 @@ class TemplateFactory extends Nette\Object implements UI\ITemplateFactory
 		});
 
 		$latte->addFilter('url', 'rawurlencode'); // back compatiblity
-		foreach (array('normalize', 'toAscii', 'webalize', 'padLeft', 'padRight', 'reverse') as $name) {
+		foreach (['normalize', 'toAscii', 'webalize', 'padLeft', 'padRight', 'reverse'] as $name) {
 			$latte->addFilter($name, 'Nette\Utils\Strings::' . $name);
 		}
-		$latte->addFilter('null', function() {});
-		$latte->addFilter('length', function($var) {
-			return is_string($var) ? Nette\Utils\Strings::length($var) : count($var);
-		});
-		$latte->addFilter('modifyDate', function($time, $delta, $unit = NULL) {
+		$latte->addFilter('null', function () {});
+		$latte->addFilter('modifyDate', function ($time, $delta, $unit = NULL) {
 			return $time == NULL ? NULL : Nette\Utils\DateTime::from($time)->modify($delta . $unit); // intentionally ==
 		});
 
+		if (!isset($latte->getFilters()['translate'])) {
+			$latte->addFilter('translate', function (Latte\Runtime\FilterInfo $fi) {
+				throw new Nette\InvalidStateException('Translator has not been set. Set translator using $template->setTranslator().');
+			});
+		}
+
 		// default parameters
-		$template->control = $template->_control = $control;
-		$template->presenter = $template->_presenter = $presenter;
 		$template->user = $this->user;
-		$template->netteHttpResponse = $this->httpResponse;
-		$template->netteCacheStorage = $this->cacheStorage;
 		$template->baseUri = $template->baseUrl = $this->httpRequest ? rtrim($this->httpRequest->getUrl()->getBaseUrl(), '/') : NULL;
 		$template->basePath = preg_replace('#https?://[^/]+#A', '', $template->baseUrl);
-		$template->flashes = array();
+		$template->flashes = [];
+		if ($control) {
+			$template->control = $control;
+			$template->presenter = $presenter;
+			$latte->addProvider('uiControl', $control);
+			$latte->addProvider('uiPresenter', $presenter);
+			$latte->addProvider('snippetBridge', new Nette\Bridges\ApplicationLatte\SnippetBridge($control));
+		}
+		$latte->addProvider('cacheStorage', $this->cacheStorage);
+
+		// back compatibility
+		$template->_control = $control;
+		$template->_presenter = $presenter;
+		$template->netteCacheStorage = $this->cacheStorage;
 
 		if ($presenter instanceof UI\Presenter && $presenter->hasFlashSession()) {
 			$id = $control->getParameterId('flash');
