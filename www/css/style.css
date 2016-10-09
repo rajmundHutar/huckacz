@@ -64,6 +64,9 @@ form th {
 form .required label {
     font-weight: bold;
 }
+form label {
+    color: #FFD700;
+}
 
 form .error {
     color: #D00;

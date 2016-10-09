@@ -5,7 +5,8 @@ namespace App\Presenters;
 use Nette\Application\UI\Form,
     App\Model\SignInTheater,
     App\Model\Entities\Theater,
-    App\Model\GalleryModel;
+    Nette\Mail\IMailer,
+    Nette\Mail\Message;
 
 /**
  * Description of LoginPresenter
@@ -15,10 +16,12 @@ use Nette\Application\UI\Form,
 class LoginPresenter extends BasePresenter {
 
     protected $signInTheater;
+    protected $mailer;
 
-    public function __construct(SignInTheater $signInTheater) {
+    public function __construct(SignInTheater $signInTheater, IMailer $mailer) {
         parent::__construct();
         $this->signInTheater = $signInTheater;
+        $this->mailer = $mailer;
     }
 
     protected function createComponentSignInForm() {
@@ -39,7 +42,7 @@ class LoginPresenter extends BasePresenter {
 
         $form->addSubmit('send', 'Přihlásit divadlo');
 
-        $form->onSuccess[] = $this->registrationFormSucceeded;
+        $form->onSuccess[] = [$this, "registrationFormSucceeded"];
 
         return $form;
     }
@@ -53,12 +56,22 @@ class LoginPresenter extends BasePresenter {
         $theater->setNumber($values->numberOfPeople);
         $theater->setComment($values->comment);
 
-        $res = $this->signInTheater->saveTheater($theater);
-        if ($res) {
+        try {
+            $this->signInTheater->saveTheater($theater);
+
+            $mail = new Message();
+            $mail->setFrom('Hučka <festiva@hucka.cz>')
+                    ->addTo('rajmund.hutar@gmail.com')
+                    ->addTo('ifka.dadakova@gmail.com')
+                    ->setSubject('Přihlášení divadla')
+                    ->setBody("Nové přihlášené divadlo: {$values->name}\nKontakt: {$values->email}\nLidí: {$values->numberOfPeople}\nVzkazy: {$values->comment}");
+            $this->mailer->send($mail);
             $this->flashMessage('Děkujeme za přihlášení vašeho divadla.', 'success');
-        } else {
+        } catch (Exception $e) {
             $this->flashMessage('Došlo k chybě při ukládání divadla, pokud tutu chybu vidíte i při opakovaném pokusu, dejte nám vědět.', 'error');
         }
+
         $this->redirect('this');
     }
+
 }
