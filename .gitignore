@@ -1,3 +1,4 @@
 *.uid-zps
 !.gitignore
+composer.lock
 vendor/*

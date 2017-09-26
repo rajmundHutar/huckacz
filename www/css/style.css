@@ -2,7 +2,6 @@ body {
     font-size: 15px;
     line-height: 1.6;
     color: #333;
-    background: white url('../images/pages/space.jpg') fixed no-repeat;
     -webkit-background-size: cover;
     -moz-background-size: cover;
     -o-background-size: cover;
@@ -10,24 +9,24 @@ body {
 }
 
 h1 {
-    color: #FFD700;
+    color: #337ab7;
 }
 h1 small{
-    color: #B29600;
+    color: #337ab7;
 }
 h2 {
-    color: #B29600;
+    color: #337ab7;
 }
 
 .text-primary{
-    color: #FFD700;
+    color: #337ab7;
 }
 
 a{
-    color: #B29600;
+    color: #337ab7;
 }
 a:hover{
-    color: #FFD700;
+    color: #337ab7;
 }
 
 #ajax-spinner {
@@ -42,7 +41,7 @@ a:hover{
 div.flash {
     color: black;
     background: #FFF9D7;
-    border: 1px solid #E2C822;
+    border: 1px solid #337ab7;
     padding: 1em;
     margin: 1em 0;
 }
@@ -65,7 +64,7 @@ form .required label {
     font-weight: bold;
 }
 form label {
-    color: #FFD700;
+    color: #337ab7;
 }
 
 form .error {
@@ -79,4 +78,21 @@ div.galleryImages img{
 
 footer p{
     margin: 0;
+}
+
+@media(min-width:991px) {
+    img.plakat {
+        margin-top: 109px;
+        min-width: 80%;
+    }
+}
+
+div.snapshots-gallery img {
+    max-height: 243px;
+}
+
+@media(max-width: 767px) {
+    div.snapshots-gallery img {
+        max-height: 220px;
+    }
 }

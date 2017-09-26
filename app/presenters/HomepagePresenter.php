@@ -22,7 +22,7 @@ class HomepagePresenter extends BasePresenter {
     
     public function renderDefault() {
         $this->template->guestBook = $this->guestbookModel->fetchAll();
-        $this->template->snapshots = $this->gallerySnapshotModel->fetch(4);
+        $this->template->snapshots = $this->gallerySnapshotModel->fetch(6);
     }
 
 }
