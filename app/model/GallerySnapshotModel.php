@@ -27,7 +27,11 @@ class GallerySnapshotModel {
             $allFiles[] = $file;
         }
         shuffle($allFiles);
-        
+
+        if (count($allFiles) <= $count) {
+            return $allFiles;
+        }
+
         $result = [];
         while(count($result) < $count){
             $file = array_pop($allFiles);

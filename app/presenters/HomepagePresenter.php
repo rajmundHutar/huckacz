@@ -2,26 +2,21 @@
 
 namespace App\Presenters;
 
-use App\Model\GuestbookModel,
-    App\Model\GallerySnapshotModel,
-    App\Model\GalleryModel;
+use App\Model\GallerySnapshotModel;
 
 /**
  * Homepage presenter.
  */
 class HomepagePresenter extends BasePresenter {
 
-    protected $guestbookModel;
+	/** @var GallerySnapshotModel */
     protected $gallerySnapshotModel;
 
-    public function __construct(GuestbookModel $guestbookModel, GallerySnapshotModel $gallerySnapshotModel) {
-        parent::__construct();
-        $this->guestbookModel = $guestbookModel;
+    public function __construct(GallerySnapshotModel $gallerySnapshotModel) {
         $this->gallerySnapshotModel = $gallerySnapshotModel;
     }
     
     public function renderDefault() {
-        $this->template->guestBook = $this->guestbookModel->fetchAll();
         $this->template->snapshots = $this->gallerySnapshotModel->fetch(6);
     }
 

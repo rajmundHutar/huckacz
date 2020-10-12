@@ -11,19 +11,19 @@
         <!-- Wrapper for slides -->
         <div class="carousel-inner">
             <div class="item active">
-                <div class="fill" style="background-image:url('{$baseUri}/images/titleCarousel/carousel1.jpg');"></div>
+                <div class="fill" style="background-image:url('{$baseUrl}/images/titleCarousel/carousel1.jpg');"></div>
                 <div class="carousel-caption">
                     <h2>Hučka aneb festival&hellip;</h2>
                 </div>
             </div>
             <div class="item">
-                <div class="fill" style="background-image:url('{$baseUri}/images/titleCarousel/carousel2.jpg');"></div>
+                <div class="fill" style="background-image:url('{$baseUrl}/images/titleCarousel/carousel2.jpg');"></div>
                 <div class="carousel-caption">
                     <h2>&hellip;na prknech, jež znamenají svět&hellip;</h2>
                 </div>
             </div>
             <div class="item">
-                <div class="fill" style="background-image:url('{$baseUri}/images/titleCarousel/carousel3.jpg');"></div>
+                <div class="fill" style="background-image:url('{$baseUrl}/images/titleCarousel/carousel3.jpg');"></div>
                 <div class="carousel-caption">
                     <h2>&hellip;kde diváci jsou herci a herci diváky.</h2>
                 </div>
@@ -41,134 +41,55 @@
 {/block}
 
 {block content}
-    <!--
-    <div class="row">
-        <div class="col-md-12 text-justify">
-            <h3>Drazí Hučkaři</h3>
-
-            <h2>Hučka 2016 bude!</h2>
-
-            <div class="text-right">Organizační tým Hučky</div>
-        </div>
-    </div>
-    -->
-
     <!-- Portfolio Section -->
     <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-6">
             <div class="row">
                 <div class="col-md-12">
                     <h1 class="page-header">
-                        Hučka 2017
+                        Hučka
                     </h1>
                 </div>
                 <div class="col-md-12">
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            <h4><i class="fa fa-fw fa-check"></i> Kdy</h4>
+                            <h4>&hellip;aneb festival</h4>
                         </div>
                         <div class="panel-body">
                             <p>
-                                v sobotu 25. listopadu 2016<br>
-                                - POZOR! dopolení hra po Třebíči<br>
-                                - začátek divadel v 15:00
+                                &hellip;byl divadelní festival pro děti a mládež, který se konal v Třebíči od roku 1999 do roku 2017
                             </p>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-12">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <h4><i class="fa fa-fw fa-gift"></i> Kde</h4>
-                        </div>
-                        <div class="panel-body">
-                            <p>
-                                v Klubu Hájek<br>
-                                Mládežnická 229<br>
-                                Třebíč
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-12">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <h4><i class="fa fa-fw fa-compass"></i>Více info</h4>
-                        </div>
-                        <div class="panel-body">
-                            <p>Více info ve <a href="https://www.facebook.com/events/171590073405320/" target="_blank">FB
-                                    události</a></p>
+                    <h2>Facebook:</h2>
+                    <div class="well text-center">
+                        <div class="fb-page" data-href="https://www.facebook.com/hucka.festival/" data-tabs="timeline"
+                             data-width="455" data-small-header="true" data-adapt-container-width="true" data-hide-cover="false"
+                             data-show-facepile="true">
+                            <blockquote cite="https://www.facebook.com/hucka.festival/" class="fb-xfbml-parse-ignore"><a
+                                        href="https://www.facebook.com/hucka.festival/">Hučka</a></blockquote>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-8 text-center">
-            <a href="{$baseUrl}/images/pages/plakat2017.jpg" data-lightbox="lightbox">
-                <img src="{$baseUrl}/images/pages/plakat2017_small.jpg" class="plakat img-responsive img-hover img-thumbnail">
-            </a>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-12">
+        <div class="col-md-6">
             <div class="col-md-12">
                 <h2 class="page-header">Momentky z minulých ročníků</h2>
             </div>
             <div class="row">
                 {foreach $snapshots as $snapshot}
-                    <div class="snapshots-gallery col-lg-4 col-md-6 col-xs-12 portfolio text-center">
-                        <a href="{$baseUri}{$snapshot->getImage()}" data-lightbox="lightbox">
+                    <div class="snapshots-gallery col-md-6 portfolio text-center">
+                        <a href="{$baseUrl}{$snapshot->getImage()}" data-lightbox="lightbox">
                             <img class="img-responsive img-portfolio img-hover img-thumbnail"
-                                 src="{$baseUri}{$snapshot->getThumbnail()}" alt="{$snapshot->getTitle()}">
+                                 src="{$baseUrl}{$snapshot->getThumbnail()}" alt="{$snapshot->getTitle()}">
                         </a>
                     </div>
                 {/foreach}
             </div>
 
-        </div>
-    </div>
-
-
-    <hr>
-
-    <div class="well">
-        <div class="row">
-            <div class="col-md-8">
-                <h3>Přihlašování již spuštěno:</h3>
-            </div>
-            <div class="col-md-4">
-                <a class="btn btn-lg btn-default btn-block" n:href="Login:default">Přihlásit vlastní divadlo</a>
-            </div>
-        </div>
-    </div>
-
-
-    <div class="row">
-        <div class="col-md-6">
-            <h2>Sponzoři:</h2>
-            <div class="well text-center">
-                Mládež kraji Vysočina
-                <img src="{$baseUri}/images/sponzori/mladezKraji.png"
-                     class="img-responsive img-portfolio img-hover img-thumbnail" alt=""/>
-                Rada dětí a mládeže kraje Vysočina
-                <img src="{$baseUri}/images/sponzori/rdmkv.png"
-                     class="img-responsive img-portfolio img-hover img-thumbnail" alt=""/>
-                <!--
-            <img src="{$baseUri}/images/sponzori/mestotrebic.jpg" class="img-responsive img-portfolio img-hover img-thumbnail" alt=""/>
-            <img src="{$baseUri}/images/sponzori/msmt.png" class="img-responsive img-portfolio img-hover img-thumbnail" alt=""/>
-            -->
-            </div>
-        </div>
-        <div class="col-md-6">
-            <h2>Facebook:</h2>
-            <div class="well text-center">
-                <div class="fb-page" data-href="https://www.facebook.com/hucka.festival/" data-tabs="timeline"
-                     data-width="455" data-small-header="true" data-adapt-container-width="true" data-hide-cover="false"
-                     data-show-facepile="true">
-                    <blockquote cite="https://www.facebook.com/hucka.festival/" class="fb-xfbml-parse-ignore"><a
-                                href="https://www.facebook.com/hucka.festival/">Hučka</a></blockquote>
-                </div>
-            </div>
         </div>
     </div>
 
