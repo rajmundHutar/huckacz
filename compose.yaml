@@ -5,7 +5,3 @@ services:
       - "8080:80"
     volumes:
       - .:/var/www/html
-    environment:
-      # Run Apache as the host user so log/ and temp/ stay writable on the bind mount
-      APACHE_RUN_USER: "#1000"
-      APACHE_RUN_GROUP: "#1000"
