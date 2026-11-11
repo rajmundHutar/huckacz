@@ -470,8 +470,7 @@ a.year-card:focus {
 .stats {
     display: flex;
     justify-content: center;
-    padding: 34px 0;
-    border-bottom: 1px solid var(--border);
+    padding: 0 0 34px;
 }
 
 .stat b {
