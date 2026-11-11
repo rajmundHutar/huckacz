@@ -17,9 +17,9 @@ abstract class BasePresenter extends Nette\Application\UI\Presenter {
 		$this->galleryModel = $galleryModel;
 	}
 
-	protected function createTemplate(): Nette\Application\UI\ITemplate {
+	protected function createTemplate(?string $class = null): Nette\Application\UI\Template {
 
-		$template = parent::createTemplate();
+		$template = parent::createTemplate($class);
 		$template->getLatte()->addFilter(
 			'smiles', function($s) {
 

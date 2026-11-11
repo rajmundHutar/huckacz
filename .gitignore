@@ -1,6 +1,5 @@
 *.uid-zps
 !.gitignore
-composer.lock
 vendor/*
 temp/cache/*
 log/*
