@@ -63,7 +63,7 @@ class GalleryModel {
 
     public function fetchGallery($year) {
         if (!isset($this->galleries[$year])) {
-            throw new Exception("Galerie nenalezena", 404);
+            throw new \Nette\Application\BadRequestException("Galerie nenalezena");
         }
         $gallery = $this->galleries[$year];
         $gallery["year"] = $year;
