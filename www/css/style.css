@@ -1,32 +1,37 @@
+/* Dark "theatre" theme */
+:root {
+    --bg: #121212;
+    --surface: #1d1d1d;
+    --surface-2: #262626;
+    --text: #e8e2d8;
+    --muted: #9a9389;
+    --accent: #f0b429;
+    --border: #2c2c2c;
+    --head-font: "Rubik", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
 body {
     font-size: 15px;
     line-height: 1.6;
-    color: #333;
-    -webkit-background-size: cover;
-    -moz-background-size: cover;
-    -o-background-size: cover;
-    background-size: cover;
+    color: var(--text);
+    background: var(--bg);
 }
 
-h1 {
-    color: #337ab7;
-}
-h1 small{
-    color: #337ab7;
-}
-h2 {
-    color: #337ab7;
+h1, h2, h3, h4, h5, h6, .navbar-brand {
+    font-family: var(--head-font);
+    font-weight: 600;
 }
 
-.text-primary{
-    color: #337ab7;
+h1, h2, .text-primary {
+    color: var(--accent);
 }
 
-a{
-    color: #337ab7;
+h1 small, .page-header small {
+    color: var(--muted);
 }
-a:hover{
-    color: #337ab7;
+
+a, a:hover, a:focus {
+    color: var(--accent);
 }
 
 #ajax-spinner {
@@ -41,7 +46,7 @@ a:hover{
 div.flash {
     color: black;
     background: #FFF9D7;
-    border: 1px solid #337ab7;
+    border: 1px solid var(--accent);
     padding: 1em;
     margin: 1em 0;
 }
@@ -64,16 +69,12 @@ form .required label {
     font-weight: bold;
 }
 form label {
-    color: #337ab7;
+    color: var(--accent);
 }
 
 form .error {
     color: #D00;
     font-weight: bold;
-}
-
-div.galleryImages img{
-    max-height: 180px;
 }
 
 footer p{
@@ -94,5 +95,278 @@ div.snapshots-gallery img {
 @media(max-width: 767px) {
     div.snapshots-gallery img {
         max-height: 220px;
+    }
+}
+/* Bootstrap components on dark background */
+.navbar-inverse {
+    background: #000;
+    border-color: #000;
+}
+
+.navbar-inverse .navbar-brand,
+.navbar-inverse .navbar-nav > li > a {
+    color: #ccc;
+}
+
+.navbar-inverse .navbar-brand:hover,
+.navbar-inverse .navbar-nav > li > a:hover,
+.navbar-inverse .navbar-nav > .open > a,
+.navbar-inverse .navbar-nav > .open > a:hover,
+.navbar-inverse .navbar-nav > .open > a:focus {
+    color: var(--accent);
+    background: transparent;
+}
+
+.dropdown-menu {
+    background: var(--surface);
+    border-color: var(--border);
+}
+
+.dropdown-menu > li > a,
+.navbar-inverse .navbar-nav .open .dropdown-menu > li > a {
+    color: var(--text);
+}
+
+.dropdown-menu > li > a:hover,
+.dropdown-menu > li > a:focus {
+    background: var(--surface-2);
+    color: var(--accent);
+}
+
+.page-header {
+    border-bottom-color: var(--border);
+}
+
+hr {
+    border-top-color: var(--border);
+}
+
+.breadcrumb {
+    background: var(--surface);
+}
+
+.breadcrumb > .active {
+    color: var(--muted);
+}
+
+.panel,
+.well {
+    background: var(--surface);
+    border-color: var(--border);
+    color: var(--text);
+}
+
+.panel-default > .panel-heading {
+    background: var(--surface-2);
+    border-color: var(--border);
+    color: var(--text);
+}
+
+.img-thumbnail {
+    background: var(--surface);
+    border-color: var(--border);
+}
+
+.btn-primary,
+.btn-primary:hover,
+.btn-primary:focus {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #111;
+}
+
+.btn-primary:hover {
+    filter: brightness(1.1);
+}
+
+.carousel-caption h2 {
+    color: #fff;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, .8);
+}
+
+footer .well {
+    color: var(--muted);
+}
+
+/* Page heading */
+.page-title {
+    margin: 30px 0 4px;
+}
+
+.page-lead {
+    color: var(--muted);
+    margin-bottom: 26px;
+}
+
+/* Past years grid */
+.years {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 22px;
+}
+
+.year-card {
+    display: block;
+    overflow: hidden;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    transition: transform .15s, box-shadow .15s;
+}
+
+a.year-card:hover,
+a.year-card:focus {
+    color: var(--text);
+    text-decoration: none;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 22px rgba(0, 0, 0, .5);
+}
+
+.year-cover {
+    position: relative;
+    aspect-ratio: 3 / 2;
+    background: var(--border) center / cover no-repeat;
+}
+
+.year-cover::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(transparent 55%, rgba(0, 0, 0, .55));
+}
+
+.year-cover-poster {
+    background-color: #fff;
+    background-size: contain;
+}
+
+.year-cover-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    font: 600 42px var(--head-font);
+}
+
+.year-body {
+    padding: 12px 14px 14px;
+}
+
+.year-name {
+    font: 600 22px/1.2 var(--head-font);
+}
+
+.year-theme {
+    min-height: 1.5em;
+    color: var(--muted);
+}
+
+.year-meta {
+    margin-top: 6px;
+    font-size: 13px;
+    color: var(--accent);
+}
+
+.year-meta-none {
+    color: var(--muted);
+}
+
+/* Gallery */
+.gallery-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.gallery-head .page-lead {
+    margin-bottom: 16px;
+}
+
+.year-nav {
+    margin-bottom: 16px;
+}
+
+.year-nav a,
+.year-nav span {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 6px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    font-size: 14px;
+}
+
+.year-nav span {
+    color: var(--muted);
+    opacity: .5;
+}
+
+.year-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 22px;
+}
+
+.year-chips a {
+    padding: 3px 11px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    font-size: 13px;
+}
+
+.year-chips a.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #111;
+    text-decoration: none;
+}
+
+.photos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 8px;
+}
+
+.photos a {
+    display: block;
+    overflow: hidden;
+    aspect-ratio: 1;
+    background: var(--border);
+    border-radius: 4px;
+}
+
+.photos img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: .85;
+    transition: transform .25s, opacity .25s;
+}
+
+.photos a:hover img,
+.photos a:focus img {
+    opacity: 1;
+    transform: scale(1.05);
+}
+
+@media (max-width: 600px) {
+    .years {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+
+    .year-name {
+        font-size: 18px;
+    }
+
+    .photos {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 4px;
     }
 }
