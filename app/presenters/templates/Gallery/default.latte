@@ -1,61 +1,24 @@
+{block title}Hučka {$gallery['year']}{/block}
+
 {block content}
-<!-- Page Heading/Breadcrumbs -->
-<div class="row">
-    <div class="col-lg-12">
-        <h1 class="page-header">Hučka {$gallery['year']} <small>{$gallery['title']}</small>
-        </h1>
-        <ol class="breadcrumb">
-            <li><a n:href="Homepage:">Home</a></li>
-            <li class="active">Galerie</li>
-            <li class="active">Hučka {$gallery['year']}</li>
-        </ol>
+<div class="gallery-head">
+    <div>
+        <h1 class="page-title">Hučka {$gallery['year']} <small>{$gallery['title']}</small></h1>
+        <p class="page-lead">{$gallery['count']} fotek</p>
+    </div>
+    <div class="year-nav">
+        {if $gallery['older']}<a n:href="this year => $gallery['older']">‹ {$gallery['older']}</a>{else}<span>‹</span>{/if}
+        {if $gallery['newer']}<a n:href="this year => $gallery['newer']">{$gallery['newer']} ›</a>{else}<span>›</span>{/if}
     </div>
 </div>
 
-
-<div class="galleryImages">
-{foreach $gallery['images'] as $image}
-    {if $iterator->counter % 4 == 1}
-        <div class="row">
-        {/if}
-        <div class="col-md-3 col-xs-5 portfolio">
-            <a href="{$baseUrl}{$image['image']}" data-lightbox="lightbox">
-                <img class="img-responsive img-portfolio img-hover img-thumbnail" src="{$baseUrl}{$image['thumbnail']}" alt="">
-            </a>
-        </div>
-
-        {if $iterator->counter % 4 == 0 || $iterator->isLast()}    
-        </div>
-    {/if}                
-{/foreach}
+<div class="year-chips">
+    <a n:foreach="array_reverse($galleries, true) as $id => $gall" n:href="this year => $id" n:class="$id === $gallery['year'] ? active">{$id}</a>
 </div>
 
-<!-- 
-<div class="row text-center">
-    <div class="col-lg-12">
-        <ul class="pagination">
-            <li>
-                <a href="#">&laquo;</a>
-            </li>
-            <li class="active">
-                <a href="#">1</a>
-            </li>
-            <li>
-                <a href="#">2</a>
-            </li>
-            <li>
-                <a href="#">3</a>
-            </li>
-            <li>
-                <a href="#">4</a>
-            </li>
-            <li>
-                <a href="#">5</a>
-            </li>
-            <li>
-                <a href="#">&raquo;</a>
-            </li>
-        </ul>
-    </div>
+<div class="photos">
+    <a n:foreach="$gallery['images'] as $image" href="{$basePath}{$image['image']}" data-lightbox="gallery">
+        <img src="{$basePath}{$image['thumbnail']}" loading="lazy" alt="">
+    </a>
 </div>
--->
+{/block}
