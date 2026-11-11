@@ -393,7 +393,7 @@ a.year-card:focus {
     grid-template-columns: repeat(8, 1fr);
 }
 
-.wall a {
+.wall div {
     display: block;
     overflow: hidden;
     aspect-ratio: 1;
@@ -407,8 +407,7 @@ a.year-card:focus {
     transition: filter .3s, transform .3s;
 }
 
-.wall a:hover img,
-.wall a:focus img {
+.wall div:hover img {
     filter: none;
     transform: scale(1.06);
 }
@@ -511,7 +510,7 @@ a.year-card:focus {
         grid-template-columns: repeat(4, 1fr);
     }
 
-    .wall a:nth-child(n+17) {
+    .wall div:nth-child(n+17) {
         display: none;
     }
 
