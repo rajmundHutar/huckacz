@@ -69,7 +69,7 @@ class GalleryModel {
         $gallery["year"] = $year;
         $gallery["images"] = [];
         if (is_dir("images/gallery/{$year}/thumbnails/")){
-            foreach (Finder::findFiles('*.jpg')->from("images/gallery/{$year}/thumbnails/") as $file) {
+            foreach (Finder::findFiles('*.jpg', '*.JPG')->from("images/gallery/{$year}/thumbnails/") as $file) {
                 $gallery["images"][] = [
                     "thumbnail" => self::GALLERY_PATH . "/{$year}/thumbnails/" . basename($file),
                     "image" => self::GALLERY_PATH . "/{$year}/images/" . basename($file),

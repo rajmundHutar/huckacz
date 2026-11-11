@@ -23,7 +23,7 @@ class GallerySnapshotModel {
     public function fetch($count) {
         
         $allFiles = [];
-        foreach(Finder::findFiles('*.jpg')->from("images/gallery/") as $file){
+        foreach(Finder::findFiles('*.jpg', '*.JPG')->from("images/gallery/") as $file){
             $allFiles[] = $file;
         }
         shuffle($allFiles);
