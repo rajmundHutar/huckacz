@@ -28,26 +28,6 @@
         {block head}{/block}
     </head>
     <body>
-        <script>
-            window.fbAsyncInit = function () {
-                FB.init({
-                    appId: '487212678121613',
-                    xfbml: true,
-                    version: 'v2.4'
-                });
-            };
-
-            (function (d, s, id) {
-                var js, fjs = d.getElementsByTagName(s)[0];
-                if (d.getElementById(id)) {
-                    return;
-                }
-                js = d.createElement(s);
-                js.id = id;
-                js.src = "//connect.facebook.net/en_US/sdk.js";
-                fjs.parentNode.insertBefore(js, fjs);
-            }(document, 'script', 'facebook-jssdk'));
-        </script>
         <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
             <div class="container">
                 <div class="navbar-header">
@@ -99,14 +79,7 @@
             <!-- Footer -->
             <footer>
                 <div class="well">
-                    <div class="row">
-                        <div class="col-xs-6">
-                            <p>Hučka aneb festival 1999 - 2017</p>
-                        </div>
-                        <div class="col-xs-6">
-                            <p class="text-right">Webmaster: <a href="//rajmund.dev">rajmund.dev</a></p>
-                        </div>
-                    </div>
+                    <p>Hučka aneb festival 1999 - 2017</p>
                 </div>
             </footer>
         </div>
