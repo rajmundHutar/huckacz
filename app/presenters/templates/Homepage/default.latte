@@ -1,9 +1,9 @@
 {block header}
     <header class="hero">
         <div class="wall">
-            <a n:foreach="$snapshots as $snapshot" href="{$basePath}{$snapshot->getImage()}" data-lightbox="wall" data-title="{$snapshot->getTitle()}">
+            <div n:foreach="$snapshots as $snapshot">
                 <img src="{$basePath}{$snapshot->getThumbnail()}" alt="{$snapshot->getTitle()}">
-            </a>
+            </div>
         </div>
         <div class="hero-overlay">
             <div>
