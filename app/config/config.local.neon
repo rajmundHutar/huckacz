@@ -1,9 +1,1 @@
 parameters:
-
-
-database:
-	dsn: 'mysql:host=127.0.0.1;dbname=hucka_cz'
-	user: root
-	password:
-	options:
-		lazy: yes
