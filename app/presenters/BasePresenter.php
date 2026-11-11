@@ -17,18 +17,6 @@ abstract class BasePresenter extends Nette\Application\UI\Presenter {
 		$this->galleryModel = $galleryModel;
 	}
 
-	protected function createTemplate(?string $class = null): Nette\Application\UI\Template {
-
-		$template = parent::createTemplate($class);
-		$template->getLatte()->addFilter(
-			'smiles', function($s) {
-
-			return preg_replace("~\*([0-9])+\*~i", "", $s);
-		}
-		);
-		return $template;
-	}
-
 	public function beforeRender() {
 
 		parent::beforeRender();
