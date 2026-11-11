@@ -17,7 +17,8 @@ class HomepagePresenter extends BasePresenter {
     }
     
     public function renderDefault() {
-        $this->template->snapshots = $this->gallerySnapshotModel->fetch(6);
+        $this->template->snapshots = $this->gallerySnapshotModel->fetch(24);
+        $this->template->yearCount = count($this->galleryModel->getYears());
     }
 
 }

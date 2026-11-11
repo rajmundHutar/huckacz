@@ -32,16 +32,19 @@ class GallerySnapshotModel {
             return $allFiles;
         }
 
+        $years = $this->galleryModel->getYears();
         $result = [];
         while(count($result) < $count){
             $file = array_pop($allFiles);
             if (strpos($file, "thumbnails") !== false){
+                preg_match('~gallery/(\d{4})/~', $file, $m);
+                $theme = $years[$m[1]]["title"] ?? "";
                 $result[] = (new GalleryItem())
                         ->setThumbnail("/" . $file)
                         ->setImage("/" . str_replace("thumbnails", "images", $file))
-                        ->setTitle("");
+                        ->setTitle("Hučka {$m[1]}" . ($theme !== "" ? " – {$theme}" : ""));
             }
-        }     
+        }
         return $result;
     }
 }

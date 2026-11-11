@@ -13,8 +13,8 @@
             <div class="year-cover year-cover-empty">{$y['year']}</div>
         {/if}
         <div class="year-body">
-            <div class="year-name">Hučka {$y['year']}</div>
-            <div class="year-theme">{$y['title']}</div>
+            <div class="year-name">{$y['title'] ?: "Hučka {$y['year']}"}</div>
+            <div class="year-theme">{if $y['title']}Hučka {$y['year']}{/if}</div>
             {if $y['count']}
                 <div class="year-meta">Fotogalerie · {$y['count']} fotek →</div>
             {else}
